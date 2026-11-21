@@ -1,76 +1,17 @@
-# job-board
+# PrimerPaso ZMG — Bolsa de Primer Empleo y Prácticas sin Experiencia (ODS 8)
 
-A responsive Job Board Web Application designed to display job listings and provide users with an easy way to explore available opportunities. Developed using HTML, CSS, and JavaScript, this project emphasizes clean UI design, responsiveness, and efficient front-end logic handling. Created as part of my Web Development Internship at CODSOFT, it helped strengthen my understanding of JavaScript fundamentals, DOM manipulation, and responsive web design principles.
+Proyecto final integrador para la asignatura **Gráficos, Interfaces y Usabilidad** (Universidad de Guadalajara · CUTonalá).
 
-💼 Job Board Web Application
-📌 Project Overview
+## Objetivo y Meta ODS
+- **ODS 8:** Trabajo Decente y Crecimiento Económico.
+- **Meta 8.6 y 8.5:** Facilitar el acceso al primer empleo formal y prácticas profesionales para estudiantes y recién egresados sin experiencia previa en el Área Metropolitana de Guadalajara, integrando filtros de accesibilidad física y digital.
 
-This project is a Job Board Web Application developed using HTML, CSS, and JavaScript. It allows users to view job postings in a structured and user-friendly layout. The project focuses on improving front-end development skills and implementing JavaScript functionality for interactive elements.
+## Accesibilidad (WCAG 2.2 Nivel AA)
+El sistema fue diseñado y auditado para cumplir con los criterios de éxito de nivel A y AA de las pautas WCAG 2.2:
+- Contraste mínimo superior a 7.4:1 en textos y controles.
+- Navegación completa por teclado con enlace "Saltar al contenido principal" y foco visible.
+- Formularios con etiquetas explícitas, ayudas contextuales y mensajes de error asociados mediante `aria-describedby`.
+- Diseño adaptable sin desplazamiento horizontal desde 320 px de ancho.
 
-The job board is fully responsive and works smoothly across different screen sizes, making it suitable for both desktop and mobile devices.
-
-✨ Features
-
-Display of job listings with key details
-
-Clean and organized layout
-
-Responsive design for all screen sizes
-
-Interactive UI elements using JavaScript
-
-User-friendly and minimal interface
-
-🛠️ Technologies Used
-
-HTML5 – Structure of the web application
-
-CSS3 – Styling, layout, and responsiveness
-
-JavaScript – Interactivity and dynamic content
-
-🚀 How to Use
-
-Open the Job Board in your browser
-
-Browse available job listings
-
-View job details in a clear layout
-
-Navigate smoothly across sections
-
-📂 Project Purpose
-
-This project was built to:
-
-Practice front-end web development skills
-
-Improve JavaScript DOM manipulation
-
-Understand responsive layout design
-
-Create a real-world, beginner-friendly web application
-
-🏢 About CodSoft
-
-This project is part of my Web Development Internship at CodSoft. CodSoft provides practical learning opportunities through real-world projects that help students strengthen their technical skills and gain hands-on experience in web development.
-
-Working on this Job Board project helped me improve my understanding of:
-
-Front-end structure and UI design
-
-JavaScript logic and interactivity
-
-Writing clean, maintainable code
-
-🔗 GitHub Pages (Optional)
-
-If deployed using GitHub Pages, the live demo link can be added here:
-
-👉 https://your-username.github.io/repository-name/
-
-🙌 Acknowledgment
-
-Thanks to CodSoft for providing this valuable learning opportunity and project guidance.
-
-⭐ If you like this project, feel free to star the repository!
+## Atribución y Créditos
+- Estructura base inspirada y adaptada a partir del repositorio abierto [shreyakamblef4-spec/job-board](https://github.com/shreyakamblef4-spec/job-board), rediseñado íntegramente para cumplimiento WCAG 2.2 AA y enfoque ODS 8.
