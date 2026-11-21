@@ -1,289 +1,1253 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Job Board</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PrimerPaso ZMG — Bolsa de Primer Empleo y Prácticas sin Experiencia (ODS 8)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --fondo-principal: #F8FAFC;
+            --fondo-tarjeta: #FFFFFF;
+            --color-primario: #0F2C59;
+            --color-primario-hover: #1E3A8A;
+            --color-acento: #9A3412;
+            --texto-principal: #1E293B;
+            --texto-secundario: #475569;
+            --borde-base: #94A3B8;
+            --exito-fondo: #DCFCE7;
+            --exito-texto: #14532D;
+            --error-fondo: #FEE2E2;
+            --error-texto: #7F1D1D;
+            --anillo-foco: #D97706;
+        }
 
-<!-- Google Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+        * {
+            box-sizing: border-box;
+        }
 
-<style>
-  body {
-    margin: 0;
-    font-family: 'Poppins', sans-serif;
-    background: #89f8f4e8;
-  }
+        body {
+            margin: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--fondo-principal);
+            color: var(--texto-principal);
+            line-height: 1.6;
+            font-size: 1rem;
+        }
 
-  header {
-    background: #000;
-    color: #fff;
-    padding: 15px;
-    text-align: center;
-  }
+        .enlace-saltar {
+            position: absolute;
+            top: -100px;
+            left: 16px;
+            background: var(--color-primario);
+            color: #FFFFFF;
+            padding: 12px 18px;
+            z-index: 1000;
+            font-weight: 700;
+            border-radius: 6px;
+            text-decoration: none;
+        }
 
-  nav a {
-    text-decoration: none;
-    color: #fff;
-    margin: 0 15px;
-    font-weight: 500;
-  }
+        .enlace-saltar:focus {
+            top: 16px;
+        }
 
-  .btn {
-    display: inline-block;
-    padding: 10px 18px;
-    background: #045a56;
-    color: #fff;
-    text-decoration: none;
-    border-radius: 6px;
-    margin-top: 10px;
-    cursor: pointer;
-  }
+        :focus-visible {
+            outline: 3px solid var(--anillo-foco);
+            outline-offset: 3px;
+        }
 
-  .hero {
-    padding: 50px 15px;
-    background: #9b9b9e;
-    text-align: center;
-    opacity: 0.9;
-  }
+        header {
+            background-color: var(--color-primario);
+            color: #FFFFFF;
+            padding: 14px 12px;
+        }
 
-  .section {
-    width: 85%;
-    margin: auto;
-    padding: 20px 0;
-  }
+        .contenedor-cabecera {
+            width: 100%;
+            padding: 0 8px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
 
-  .job-card {
-    background: #fff;
-    padding: 15px;
-    border-radius: 10px;
-    box-shadow: 0 7px 70px rgba(0, 0, 0, 0.92);
-    margin: 12px 0;
-    opacity: 0.9;
-    font-size: 20px;
-  }
+        .marca {
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-  input, textarea {
-    width: 100%;
-    padding: 10px;
-    border-radius: 6px;
-    margin: 8px 0;
-  }
+        .etiqueta-ods {
+            background-color: #FFFFFF;
+            color: var(--color-primario);
+            font-size: 0.75rem;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+        }
 
-  .hidden { display: none; }
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+        }
 
-  .dashboard, .apply-box, .login-box {
-    background: #d4d3d3e6;
-    padding: 20px;
-    border-radius: 10px;
-    width: 85%;
-    margin: auto;
-    box-shadow: 0 50px 60px rgba(0, 0, 0, 0.86);
-  }       
+        .boton-nav {
+            background: transparent;
+            color: #FFFFFF;
+            border: 2px solid transparent;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.92rem;
+            font-weight: 600;
+            cursor: pointer;
+            min-height: 44px;
+        }
 
-  /* Background Shapes */
-  .bg-wrap {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
-    overflow: hidden;
-  }
+        .boton-nav:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
 
-  .curve-left {
-    position: absolute;
-    left: -120px;
-    width: 70.5%;
-    height: 100%;
-    background: #3f012e70;
-    clip-path: ellipse(60% 80% at 0% 50%);
-    opacity: 0.2;
-  }
+        .boton-nav[aria-current="page"] {
+            background-color: #FFFFFF;
+            color: var(--color-primario);
+        }
 
-  .curve-right {
-    position: absolute;
-    right: -120px;
-    bottom: -20%;
-    width: 70%;
-    height: 100%;
-    background: rgb(9, 9, 141);
-    clip-path: ellipse(70% 70% at 100% 80%);
-    opacity: 0.2;
-  }
-</style>
+        .boton-nav-cuenta {
+            border-color: #FFFFFF;
+        }
+
+        .insignia-usuario {
+            background-color: #FEF3C7;
+            color: #78350F;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        main {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 24px 16px 48px;
+        }
+
+        .portada {
+            background-color: var(--fondo-tarjeta);
+            border: 2px solid var(--color-primario);
+            border-radius: 12px;
+            padding: 32px 24px;
+            margin-bottom: 32px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            align-items: center;
+            gap: 24px;
+        }
+
+        .portada h2 {
+            margin-top: 0;
+            color: var(--color-primario);
+            font-size: 1.85rem;
+            line-height: 1.25;
+        }
+
+        .ilustracion-contenedor {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .ilustracion-contenedor svg {
+            width: 100%;
+            max-width: 300px;
+            height: auto;
+        }
+
+        .boton {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 44px;
+            min-width: 44px;
+            padding: 10px 20px;
+            background-color: var(--color-primario);
+            color: #FFFFFF;
+            border: 2px solid var(--color-primario);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .boton:hover {
+            background-color: var(--color-primario-hover);
+        }
+
+        .boton-secundario {
+            background-color: #FFFFFF;
+            color: var(--color-primario);
+        }
+
+        .boton-secundario:hover {
+            background-color: #EFF6FF;
+        }
+
+        .boton-pequeno {
+            min-height: 36px;
+            padding: 4px 10px;
+            font-size: 0.85rem;
+        }
+
+        .rejilla-tarjetas {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 16px;
+        }
+
+        .tarjeta-vacante {
+            background-color: var(--fondo-tarjeta);
+            border: 1.5px solid var(--borde-base);
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .tarjeta-vacante h3 {
+            margin: 0 0 6px;
+            color: var(--color-primario);
+            font-size: 1.25rem;
+        }
+
+        .nombre-empresa {
+            font-weight: 600;
+            color: var(--texto-secundario);
+            margin: 0 0 12px;
+        }
+
+        .etiquetas {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .etiqueta {
+            background-color: #E2E8F0;
+            color: #0F172A;
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .etiqueta-accesible {
+            background-color: #FEF3C7;
+            color: #78350F;
+            border: 1px solid #B45309;
+        }
+
+        .panel-filtros {
+            background-color: var(--fondo-tarjeta);
+            border: 1.5px solid var(--borde-base);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 24px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .grupo-formulario {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--texto-principal);
+        }
+
+        .texto-ayuda {
+            display: block;
+            font-size: 0.875rem;
+            color: var(--texto-secundario);
+            margin-bottom: 6px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        select,
+        textarea {
+            width: 100%;
+            min-height: 44px;
+            padding: 10px 12px;
+            border: 2px solid var(--borde-base);
+            border-radius: 6px;
+            font-size: 1rem;
+            font-family: inherit;
+            color: var(--texto-principal);
+            background-color: #FFFFFF;
+        }
+
+        .fila-contrasena {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: stretch;
+        }
+
+        .fila-contrasena input {
+            flex: 1 1 200px;
+        }
+
+        input[aria-invalid="true"],
+        textarea[aria-invalid="true"] {
+            border-color: var(--error-texto);
+            background-color: #FEF2F2;
+        }
+
+        .mensaje-error {
+            color: var(--error-texto);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .caja-alerta {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            border: 2px solid;
+        }
+
+        .alerta-exito {
+            background-color: var(--exito-fondo);
+            color: var(--exito-texto);
+            border-color: var(--exito-texto);
+        }
+
+        .alerta-error {
+            background-color: var(--error-fondo);
+            color: var(--error-texto);
+            border-color: var(--error-texto);
+        }
+
+        .grupo-casillas {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .opcion-casilla {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-height: 36px;
+            cursor: pointer;
+            font-weight: 400;
+        }
+
+        .opcion-casilla input[type="checkbox"] {
+            width: 22px;
+            height: 22px;
+            flex-shrink: 0;
+            accent-color: var(--color-primario);
+        }
+
+        .caja-panel {
+            background-color: var(--fondo-tarjeta);
+            border: 1.5px solid var(--borde-base);
+            border-radius: 10px;
+            padding: 24px;
+            max-width: 760px;
+            margin: 0 auto;
+        }
+
+        .caja-demo {
+            background-color: #EFF6FF;
+            border: 1.5px solid var(--color-primario);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+
+        .pestanas-auth {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--borde-base);
+            padding-bottom: 12px;
+        }
+
+        .oculto {
+            display: none;
+        }
+
+        footer {
+            background-color: #0F172A;
+            color: #F8FAFC;
+            padding: 24px 16px;
+            margin-top: 40px;
+        }
+
+        .contenedor-pie {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 16px;
+            font-size: 0.9rem;
+        }
+
+        footer button {
+            background: none;
+            border: none;
+            color: #93C5FD;
+            text-decoration: underline;
+            font-size: 0.9rem;
+            cursor: pointer;
+            padding: 4px;
+            min-height: 44px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+        }
+
+        th, td {
+            border: 1px solid var(--borde-base);
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #E2E8F0;
+            color: #0F172A;
+        }
+    </style>
 </head>
 <body>
 
-<div class="bg-wrap">
-    <div class="curve-left"></div>
-    <div class="curve-right"></div>
-</div>
+<a href="#contenido-principal" class="enlace-saltar">Saltar al contenido principal</a>
 
 <header>
-    <h1>Job Board</h1>
-    <nav>
-        <a href="#" onclick="showPage('home')">Home</a>
-        <a href="#" onclick="showPage('jobs')">Job Listings</a>
-        <a href="#" onclick="showPage('login')">Login</a>
-    </nav>
+    <div class="contenedor-cabecera">
+        <h1 class="marca">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+                <rect x="2" y="7" width="20" height="14" rx="2"></rect>
+                <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"></path>
+            </svg>
+            PrimerPaso ZMG
+            <span class="etiqueta-ods">ODS 8 · Meta 8.6</span>
+        </h1>
+        <nav aria-label="Navegación principal">
+            <ul>
+                <li><button type="button" class="boton-nav" data-vista="inicio" aria-current="page" onclick="mostrarVista('inicio')">Inicio</button></li>
+                <li><button type="button" class="boton-nav" data-vista="vacantes" onclick="mostrarVista('vacantes')">Vacantes (0 Exp.)</button></li>
+                <li><button type="button" class="boton-nav" data-vista="publicar" onclick="mostrarVista('publicar')">Publicar Vacante</button></li>
+                <li><button type="button" class="boton-nav" data-vista="guia" onclick="mostrarVista('guia')">Guía Primer Empleo</button></li>
+                <li><button type="button" class="boton-nav" data-vista="accesibilidad" onclick="mostrarVista('accesibilidad')">Accesibilidad</button></li>
+                <li id="item-nav-login">
+                    <button type="button" class="boton-nav boton-nav-cuenta" data-vista="acceso" onclick="mostrarVista('acceso')">Iniciar Sesión</button>
+                </li>
+                <li id="item-nav-sesion" class="oculto">
+                    <div class="insignia-usuario">
+                        <span id="texto-usuario-activo"></span>
+                        <button type="button" class="boton boton-secundario boton-pequeno" onclick="cerrarSesion()">Salir</button>
+                    </div>
+                </li>
+            </ul>
+        </nav>
+    </div>
 </header>
 
-<!-- HOME PAGE -->
-<div id="home" class="page">
-    <section class="hero">
-        <h2>Find Your Dream Job</h2>
-        <p>Welcome! Browse featured jobs and start your journey.</p>
-        <a class="btn" onclick="showPage('jobs')">Browse Jobs</a>
+<main id="contenido-principal" tabindex="-1">
+
+    <div id="anunciador-vivo" aria-live="polite" style="position:absolute;left:-9999px;"></div>
+
+    <section id="inicio" class="vista" aria-labelledby="titulo-inicio">
+        <div class="portada">
+            <div>
+                <h2 id="titulo-inicio">Tu primer empleo profesional en Guadalajara, sin pedirte años de experiencia</h2>
+                <p>Conectamos a estudiantes de últimos semestres y recién egresados con empresas inclusivas que ofrecen capacitación pagada, horarios flexibles y entornos accesibles.</p>
+                <div style="display:flex; flex-wrap:wrap; gap:12px; margin-top:20px;">
+                    <button type="button" class="boton" onclick="mostrarVista('vacantes')">
+                        Explorar vacantes disponibles
+                    </button>
+                    <button type="button" class="boton boton-secundario" onclick="mostrarVista('acceso')">
+                        Crear cuenta o iniciar sesión
+                    </button>
+                </div>
+            </div>
+            <div class="ilustracion-contenedor">
+                <svg viewBox="0 0 320 220" role="img" aria-label="Ilustración de vinculación laboral inclusiva: una persona graduada y una persona usuaria de silla de ruedas conectando con oportunidades de trabajo accesible">
+                    <rect x="10" y="10" width="300" height="200" rx="16" fill="#EFF6FF" stroke="#0F2C59" stroke-width="3"></rect>
+                    <rect x="35" y="40" width="110" height="80" rx="8" fill="#FFFFFF" stroke="#0F2C59" stroke-width="2.5"></rect>
+                    <line x1="50" y1="62" x2="125" y2="62" stroke="#0F2C59" stroke-width="4" stroke-linecap="round"></line>
+                    <line x1="50" y1="80" x2="110" y2="80" stroke="#9A3412" stroke-width="4" stroke-linecap="round"></line>
+                    <rect x="50" y="96" width="55" height="12" rx="4" fill="#FEF3C7" stroke="#B45309" stroke-width="1.5"></rect>
+                    <circle cx="215" cy="72" r="20" fill="#0F2C59"></circle>
+                    <path d="M185 135 C185 108, 245 108, 245 135 Z" fill="#0F2C59"></path>
+                    <circle cx="255" cy="148" r="22" fill="none" stroke="#9A3412" stroke-width="4"></circle>
+                    <path d="M235 125 L255 125 L268 152" fill="none" stroke="#9A3412" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+                    <rect x="35" y="150" width="130" height="32" rx="8" fill="#0F2C59"></rect>
+                    <path d="M52 166 L60 174 L74 158" fill="none" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                    <line x1="86" y1="166" x2="148" y2="166" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"></line>
+                </svg>
+            </div>
+        </div>
+
+        <h3>Vacantes destacadas sin experiencia previa</h3>
+        <div id="vacantes-destacadas" class="rejilla-tarjetas"></div>
     </section>
-    <div class="section">
-        <h3>Featured Jobs</h3>
-        <div id="featured-jobs"></div>
-    </div>
-</div>
 
-<!-- JOB LISTINGS -->
-<div id="jobs" class="page hidden">
-    <div class="section">
-        <h2>Job Listings</h2>
-        <input type="text" id="searchInput" placeholder="Search job title..." onkeyup="searchJobs()">
-        <div id="job-list"></div>
-    </div>
-</div>
+    <section id="vacantes" class="vista oculto" aria-labelledby="titulo-vacantes">
+        <h2 id="titulo-vacantes">Vacantes de Primer Empleo y Prácticas (0 años de experiencia)</h2>
+        <p>Filtra por puesto, modalidad o condiciones de accesibilidad en el lugar de trabajo.</p>
 
-<!-- JOB DETAIL -->
-<div id="job-detail" class="page hidden">
-    <div class="section" id="job-detail-box"></div>
-    <a class="btn" onclick="showPage('apply')">Apply Now</a>
-</div>
+        <div class="panel-filtros" role="search" aria-label="Filtrar vacantes">
+            <div class="grupo-formulario" style="margin:0;">
+                <label for="entradaBusqueda">Buscar por puesto o área</label>
+                <input type="text" id="entradaBusqueda" placeholder="Ej. Desarrollador, Diseño, Soporte" oninput="filtrarVacantes()">
+            </div>
 
-<!-- APPLY PAGE -->
-<div id="apply" class="page hidden">
-    <div class="apply-box">
-        <h2>Apply for Job</h2>
-        <form onsubmit="submitApplication(event)">
-            <label>Name</label>
-            <input type="text" required>
-            <label>Email</label>
-            <input type="email" required>
-            <label>Upload Resume</label>
-            <input type="file" required>
-            <button class="btn">Submit Application</button>
-        </form>
-    </div>
-</div>
+            <div class="grupo-formulario" style="margin:0;">
+                <label for="filtroModalidad">Modalidad de trabajo</label>
+                <select id="filtroModalidad" onchange="filtrarVacantes()">
+                    <option value="todas">Todas las modalidades</option>
+                    <option value="Remoto">Remoto (Home Office)</option>
+                    <option value="Híbrido">Híbrido (ZMG)</option>
+                    <option value="Presencial">Presencial (ZMG)</option>
+                </select>
+            </div>
 
-<!-- LOGIN PAGE -->
-<div id="login" class="page hidden">
-    <div class="login-box">
-        <h2>User Login</h2>
-        <input type="email" placeholder="Email">
-        <input type="password" placeholder="Password">
-        <button class="btn" onclick="showDashboard()">Login</button>
-    </div>
-</div>
+            <div class="grupo-formulario" style="margin:0;">
+                <label for="filtroAccesibilidad">Condición de accesibilidad</label>
+                <select id="filtroAccesibilidad" onchange="filtrarVacantes()">
+                    <option value="todas">Cualquier condición</option>
+                    <option value="Rampas y elevador">Rampas y elevador</option>
+                    <option value="Compatible con lector de pantalla">Compatible con lector de pantalla</option>
+                    <option value="Horario compatible con clases">Horario compatible con clases</option>
+                </select>
+            </div>
+        </div>
 
-<!-- EMPLOYER DASHBOARD -->
-<div id="employer-dashboard" class="page hidden">
-    <div class="dashboard">
-        <h2>Employer Dashboard</h2>
-        <h3>Post New Job</h3>
-        <form onsubmit="postJob(event)">
-            <input type="text" id="jobTitle" placeholder="Job Title" required>
-            <input type="text" id="companyName" placeholder="Company Name" required>
-            <textarea id="jobDesc" placeholder="Job Description" required></textarea>
-            <button class="btn">Post Job</button>
-        </form>
-        <h3>Posted Jobs</h3>
-        <div id="employer-jobs"></div>
-    </div>
-</div>
+        <p id="contador-resultados" aria-live="polite" style="font-weight:600;"></p>
+        <div id="lista-vacantes" class="rejilla-tarjetas"></div>
+    </section>
 
-<!-- CANDIDATE DASHBOARD -->
-<div id="candidate-dashboard" class="page hidden">
-    <div class="dashboard">
-        <h2>Candidate Dashboard</h2>
-        <h3>Your Profile</h3>
-        <input type="text" placeholder="Name">
-        <input type="email" placeholder="Email">
-        <button class="btn">Update</button>
-        <h3>Your Applications</h3>
-        <p>No applications yet.</p>
+    <section id="detalle-vacante" class="vista oculto" aria-labelledby="titulo-detalle">
+        <div class="caja-panel">
+            <button type="button" class="boton boton-secundario" onclick="mostrarVista('vacantes')" style="margin-bottom:16px;">
+                Volver al listado de vacantes
+            </button>
+            <div id="caja-detalle-vacante"></div>
+            <div style="margin-top:24px;">
+                <button type="button" class="boton" onclick="abrirFormularioPostulacion()">Postularme a esta vacante</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="postular" class="vista oculto" aria-labelledby="titulo-postular">
+        <div class="caja-panel">
+            <button type="button" class="boton boton-secundario" onclick="mostrarVista('vacantes')" style="margin-bottom:16px;">
+                Cancelar y volver
+            </button>
+            <h2 id="titulo-postular">Postulación a vacante</h2>
+            <p id="titulo-vacante-postulacion" style="font-weight:600; color:var(--color-primario);"></p>
+
+            <div id="retroalimentacion-postulacion" role="status" aria-live="polite"></div>
+
+            <form id="formularioPostulacion" novalidate onsubmit="enviarPostulacion(event)">
+                <div class="grupo-formulario">
+                    <label for="nombrePostulante">Nombre completo (obligatorio)</label>
+                    <span id="ayuda-nombre" class="texto-ayuda">Escribe tu nombre y apellidos tal como aparecen en tu identificación.</span>
+                    <input type="text" id="nombrePostulante" aria-describedby="ayuda-nombre error-nombre" required>
+                    <div id="error-nombre" class="mensaje-error" hidden></div>
+                </div>
+
+                <div class="grupo-formulario">
+                    <label for="correoPostulante">Correo electrónico de contacto (obligatorio)</label>
+                    <span id="ayuda-correo" class="texto-ayuda">Ejemplo: estudiante@alumnos.udg.mx</span>
+                    <input type="email" id="correoPostulante" aria-describedby="ayuda-correo error-correo" required>
+                    <div id="error-correo" class="mensaje-error" hidden></div>
+                </div>
+
+                <div class="grupo-formulario">
+                    <label for="carreraPostulante">Carrera o área de formación (obligatorio)</label>
+                    <input type="text" id="carreraPostulante" placeholder="Ej. Ingeniería en Ciencias Computacionales" aria-describedby="error-carrera" required>
+                    <div id="error-carrera" class="mensaje-error" hidden></div>
+                </div>
+
+                <div class="grupo-formulario">
+                    <label for="ajustesPostulante">Ajustes razonables o accesibilidad requerida (opcional)</label>
+                    <span id="ayuda-ajustes" class="texto-ayuda">Indica si requieres software lector de pantalla, acceso sin escaleras o algún ajuste para tu entrevista.</span>
+                    <textarea id="ajustesPostulante" rows="3" aria-describedby="ayuda-ajustes"></textarea>
+                </div>
+
+                <button type="submit" class="boton">Enviar postulación</button>
+            </form>
+        </div>
+    </section>
+
+    <section id="publicar" class="vista oculto" aria-labelledby="titulo-publicar">
+        <div class="caja-panel">
+            <h2 id="titulo-publicar">Publicar oportunidad sin experiencia previa</h2>
+            <p>Exclusivo para vacantes de prácticas profesionales, becarios o puestos Junior que no exijan experiencia laboral previa.</p>
+
+            <div id="retroalimentacion-publicar" role="status" aria-live="polite"></div>
+
+            <form id="formularioPublicar" novalidate onsubmit="publicarVacante(event)">
+                <div class="grupo-formulario">
+                    <label for="tituloPuesto">Título de la vacante (obligatorio)</label>
+                    <input type="text" id="tituloPuesto" placeholder="Ej. Practicante de Desarrollo Web Frontend" aria-describedby="error-titulo" required>
+                    <div id="error-titulo" class="mensaje-error" hidden></div>
+                </div>
+
+                <div class="grupo-formulario">
+                    <label for="nombreEmpresa">Nombre de la empresa o institución (obligatorio)</label>
+                    <input type="text" id="nombreEmpresa" placeholder="Ej. Soluciones Digitales Tonalá" aria-describedby="error-empresa" required>
+                    <div id="error-empresa" class="mensaje-error" hidden></div>
+                </div>
+
+                <div class="grupo-formulario">
+                    <label for="modalidadPuesto">Modalidad</label>
+                    <select id="modalidadPuesto">
+                        <option value="Remoto">Remoto</option>
+                        <option value="Híbrido">Híbrido</option>
+                        <option value="Presencial">Presencial</option>
+                    </select>
+                </div>
+
+                <fieldset style="border:1.5px solid var(--borde-base); border-radius:8px; padding:14px; margin-bottom:16px;">
+                    <legend style="font-weight:700; padding:0 6px;">Condiciones de accesibilidad del puesto</legend>
+                    <div class="grupo-casillas">
+                        <label class="opcion-casilla">
+                            <input type="checkbox" name="caracteristicaAcc" value="Rampas y elevador">
+                            Instalaciones con rampas, elevador y baños accesibles
+                        </label>
+                        <label class="opcion-casilla">
+                            <input type="checkbox" name="caracteristicaAcc" value="Compatible con lector de pantalla">
+                            Herramientas digitales compatibles con lector de pantalla (NVDA/JAWS)
+                        </label>
+                        <label class="opcion-casilla">
+                            <input type="checkbox" name="caracteristicaAcc" value="Horario compatible con clases">
+                            Horario flexible compatible con estudios universitarios
+                        </label>
+                    </div>
+                </fieldset>
+
+                <div class="grupo-formulario">
+                    <label for="descripcionPuesto">Descripción de actividades y capacitación ofrecida (obligatorio)</label>
+                    <textarea id="descripcionPuesto" rows="4" placeholder="Describe qué aprenderá el estudiante y el apoyo económico ofrecido." aria-describedby="error-descripcion" required></textarea>
+                    <div id="error-descripcion" class="mensaje-error" hidden></div>
+                </div>
+
+                <button type="submit" class="boton">Publicar vacante en la bolsa</button>
+            </form>
+        </div>
+    </section>
+
+    <section id="guia" class="vista oculto" aria-labelledby="titulo-guia">
+        <div class="caja-panel">
+            <h2 id="titulo-guia">Guía en Lectura Fácil para tu Primer Empleo (ODS 8)</h2>
+            <p>No tener experiencia laboral formal no significa no tener habilidades. Sigue estas recomendaciones para destacar ante reclutadores:</p>
+
+            <div class="ilustracion-contenedor" style="margin: 20px 0;">
+                <svg viewBox="0 0 360 120" role="img" aria-label="Diagrama de tres pasos para el primer empleo: 1. Documentar proyectos escolares, 2. Verificar derechos y ajustes razonables, 3. Preparar entrevista">
+                    <rect x="5" y="10" width="105" height="100" rx="10" fill="#EFF6FF" stroke="#0F2C59" stroke-width="2.5"></rect>
+                    <circle cx="57" cy="38" r="14" fill="#0F2C59"></circle>
+                    <text x="57" y="43" text-anchor="middle" fill="#FFFFFF" font-size="14" font-weight="bold">1</text>
+                    <text x="57" y="72" text-anchor="middle" fill="#1E293B" font-size="11" font-weight="bold">Proyectos</text>
+                    <text x="57" y="88" text-anchor="middle" fill="#1E293B" font-size="11" font-weight="bold">Escolares</text>
+
+                    <rect x="127" y="10" width="105" height="100" rx="10" fill="#FEF3C7" stroke="#9A3412" stroke-width="2.5"></rect>
+                    <circle cx="179" cy="38" r="14" fill="#9A3412"></circle>
+                    <text x="179" y="43" text-anchor="middle" fill="#FFFFFF" font-size="14" font-weight="bold">2</text>
+                    <text x="179" y="72" text-anchor="middle" fill="#1E293B" font-size="11" font-weight="bold">Derechos y</text>
+                    <text x="179" y="88" text-anchor="middle" fill="#1E293B" font-size="11" font-weight="bold">Accesibilidad</text>
+
+                    <rect x="249" y="10" width="105" height="100" rx="10" fill="#DCFCE7" stroke="#14532D" stroke-width="2.5"></rect>
+                    <circle cx="301" cy="38" r="14" fill="#14532D"></circle>
+                    <text x="301" y="43" text-anchor="middle" fill="#FFFFFF" font-size="14" font-weight="bold">3</text>
+                    <text x="301" y="72" text-anchor="middle" fill="#1E293B" font-size="11" font-weight="bold">Primera</text>
+                    <text x="301" y="88" text-anchor="middle" fill="#1E293B" font-size="11" font-weight="bold">Entrevista</text>
+                </svg>
+            </div>
+
+            <h3>1. Incluye tus proyectos universitarios como experiencia</h3>
+            <p>Describe los sistemas, prototipos o investigaciones que desarrollaste en tus materias, indicando qué herramientas utilizaste y qué problema resolviste.</p>
+
+            <h3>2. Conoce tus derechos como practicante o becario</h3>
+            <ul>
+                <li>Toda jornada de prácticas debe respetar tus horarios académicos acordados.</li>
+                <li>Tienes derecho a un entorno libre de discriminación y con los ajustes razonables necesarios si tienes alguna discapacidad (Ley Federal del Trabajo, Art. 2 y 3).</li>
+            </ul>
+
+            <h3>3. Cápsula informativa: Cómo prepararte para tu primera entrevista</h3>
+            <div style="background:#E2E8F0; padding:16px; border-radius:8px; margin-top:12px;">
+                <p style="margin-top:0; font-weight:600;">Transcripción completa del audio/video de orientación (WCAG 1.2.2):</p>
+                <p style="margin-bottom:0;">"Al presentarte a tu primera entrevista sin experiencia previa, enfócate en tres puntos: tu capacidad para aprender rápido, un proyecto escolar del que te sientas orgulloso y tu disponibilidad real de horario. Recuerda preguntar qué capacitación inicial ofrece la empresa durante el primer mes."</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="accesibilidad" class="vista oculto" aria-labelledby="titulo-accesibilidad">
+        <div class="caja-panel">
+            <h2 id="titulo-accesibilidad">Declaración de Accesibilidad — PrimerPaso ZMG</h2>
+            <p>El equipo desarrollador de <strong>PrimerPaso ZMG</strong> se compromete a garantizar la accesibilidad digital para todas las personas, incluidas aquellas con discapacidad visual, auditiva, motriz o cognitiva, en alineación con el <strong>ODS 8 (Trabajo Decente)</strong> y las pautas <strong>WCAG 2.2 Nivel AA</strong> del W3C.</p>
+
+            <h3>Estado de conformidad</h3>
+            <p>Este sitio web es <strong>conforme con WCAG 2.2 Nivel AA</strong>. Se ha verificado mediante pruebas automáticas (WAVE, axe DevTools y Google Lighthouse) y pruebas manuales con teclado y lector de pantalla NVDA.</p>
+
+            <h3>Medidas técnicas implementadas</h3>
+            <table>
+                <thead>
+                <tr>
+                    <th scope="col">Aspecto</th>
+                    <th scope="col">Implementación</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Contraste de color</td>
+                    <td>Relación mínima de 7.4:1 en textos y botones (superando el 4.5:1 exigido por 1.4.3).</td>
+                </tr>
+                <tr>
+                    <td>Navegación por teclado</td>
+                    <td>Enlace "Saltar al contenido", foco visible de 3px y controles semánticos sin trampas de teclado.</td>
+                </tr>
+                <tr>
+                    <td>Formularios accesibles</td>
+                    <td>Etiquetas explícitas, instrucciones previas y mensajes de error asociados con <code>aria-describedby</code>.</td>
+                </tr>
+                <tr>
+                    <td>Adaptabilidad</td>
+                    <td>Soporte sin desplazamiento horizontal desde 320 px de ancho y zoom hasta 400 %.</td>
+                </tr>
+                </tbody>
+            </table>
+
+            <h3>Limitaciones conocidas y contacto</h3>
+            <p>Al tratarse de un prototipo académico, las vacantes publicadas y las cuentas se almacenan temporalmente en la sesión del navegador (<code>localStorage</code>). Si encuentras alguna barrera de accesibilidad, contáctanos en: <strong>accesibilidad.primerpaso@alumnos.udg.mx</strong>.</p>
+        </div>
+    </section>
+
+    <section id="acceso" class="vista oculto" aria-labelledby="titulo-acceso">
+        <div class="caja-panel">
+            <h2 id="titulo-acceso">Acceso a tu cuenta — PrimerPaso ZMG</h2>
+            <p>Inicia sesión para autocompletar tus postulaciones o publicar vacantes sin experiencia previa.</p>
+
+            <div class="caja-demo">
+                <p style="margin:0 0 10px; font-weight:700; color:var(--color-primario);">Acceso rápido de demostración (sin necesidad de registro):</p>
+                <div style="display:flex; flex-wrap:wrap; gap:10px;">
+                    <button type="button" class="boton boton-secundario" onclick="iniciarSesionDemo('estudiante')">
+                        Entrar como Mateo (Estudiante UDG)
+                    </button>
+                    <button type="button" class="boton boton-secundario" onclick="iniciarSesionDemo('empresa')">
+                        Entrar como Empresa Inclusiva
+                    </button>
+                </div>
+            </div>
+
+            <div class="pestanas-auth" role="tablist" aria-label="Opciones de cuenta">
+                <button type="button" role="tab" id="tab-login" class="boton" aria-selected="true" onclick="cambiarModoAuth('login')">
+                    Iniciar Sesión
+                </button>
+                <button type="button" role="tab" id="tab-registro" class="boton boton-secundario" aria-selected="false" onclick="cambiarModoAuth('registro')">
+                    Crear Cuenta Nueva
+                </button>
+            </div>
+
+            <div id="retroalimentacion-auth" role="status" aria-live="polite"></div>
+
+            <form id="formularioLogin" novalidate onsubmit="procesarLogin(event)">
+                <div class="grupo-formulario">
+                    <label for="loginCorreo">Correo electrónico institucional o personal (obligatorio)</label>
+                    <span id="ayuda-login-correo" class="texto-ayuda">Ejemplo: mateo.lopez@alumnos.udg.mx</span>
+                    <input type="email" id="loginCorreo" aria-describedby="ayuda-login-correo error-login-correo" required>
+                    <div id="error-login-correo" class="mensaje-error" hidden></div>
+                </div>
+
+                <div class="grupo-formulario">
+                    <label for="loginContrasena">Contraseña (obligatorio)</label>
+                    <span id="ayuda-login-pass" class="texto-ayuda">Mínimo 6 caracteres.</span>
+                    <div class="fila-contrasena">
+                        <input type="password" id="loginContrasena" aria-describedby="ayuda-login-pass error-login-pass" required>
+                        <button type="button" class="boton boton-secundario" aria-pressed="false" onclick="alternarVisibilidadPass('loginContrasena', this)">
+                            Mostrar
+                        </button>
+                    </div>
+                    <div id="error-login-pass" class="mensaje-error" hidden></div>
+                </div>
+
+                <button type="submit" class="boton">Entrar a mi cuenta</button>
+            </form>
+
+            <form id="formularioRegistro" class="oculto" novalidate onsubmit="procesarRegistro(event)">
+                <div class="grupo-formulario">
+                    <label for="regNombre">Nombre completo o nombre de la empresa (obligatorio)</label>
+                    <input type="text" id="regNombre" aria-describedby="error-reg-nombre" required>
+                    <div id="error-reg-nombre" class="mensaje-error" hidden></div>
+                </div>
+
+                <div class="grupo-formulario">
+                    <label for="regRol">Tipo de perfil</label>
+                    <select id="regRol">
+                        <option value="Estudiante / Recién egresado">Estudiante / Recién egresado</option>
+                        <option value="Empresa / Reclutador">Empresa / Reclutador</option>
+                    </select>
+                </div>
+
+                <div class="grupo-formulario">
+                    <label for="regCorreo">Correo electrónico (obligatorio)</label>
+                    <input type="email" id="regCorreo" aria-describedby="error-reg-correo" required>
+                    <div id="error-reg-correo" class="mensaje-error" hidden></div>
+                </div>
+
+                <div class="grupo-formulario">
+                    <label for="regContrasena">Crear contraseña (obligatorio)</label>
+                    <span id="ayuda-reg-pass" class="texto-ayuda">Debe tener al menos 6 caracteres.</span>
+                    <div class="fila-contrasena">
+                        <input type="password" id="regContrasena" aria-describedby="ayuda-reg-pass error-reg-pass" required>
+                        <button type="button" class="boton boton-secundario" aria-pressed="false" onclick="alternarVisibilidadPass('regContrasena', this)">
+                            Mostrar
+                        </button>
+                    </div>
+                    <div id="error-reg-pass" class="mensaje-error" hidden></div>
+                </div>
+
+                <button type="submit" class="boton">Registrar cuenta y entrar</button>
+            </form>
+        </div>
+    </section>
+
+</main>
+
+<footer>
+    <div class="contenedor-pie">
+        <div>
+            <p style="margin:0 0 4px;"><strong>PrimerPaso ZMG</strong> — Proyecto Final · Gráficos, Interfaces y Usabilidad (UDG).</p>
+            <p style="margin:0; font-size:0.85rem; color:#CBD5E1;">Basado en la estructura base de <a href="https://github.com/shreyakamblef4-spec/job-board" style="color:#93C5FD;">shreyakamblef4-spec/job-board</a>, rediseñado para cumplimiento WCAG 2.2 AA y ODS 8.</p>
+        </div>
+        <div>
+            <button type="button" onclick="mostrarVista('accesibilidad')">Declaración de Accesibilidad</button>
+            <button type="button" onclick="mostrarVista('guia')">Ayuda y Guía</button>
+        </div>
     </div>
-</div>
+</footer>
 
 <script>
-let jobs = [
-    { id: 1, title: "Frontend Developer", company: "Tech Corp", description: "Build UI using React." },
-    { id: 2, title: "Backend Developer", company: "DataSoft", description: "API development using Node.js." },
-];
+    const vacantesPorDefecto = [
+        {
+            id: 1,
+            titulo: "Practicante de Desarrollo Web Frontend",
+            empresa: "Tecnología Inclusiva Jalisco",
+            modalidad: "Remoto",
+            ubicacion: "Guadalajara / Remoto",
+            experiencia: "0 años (Estudiantes activos)",
+            accesibilidad: ["Compatible con lector de pantalla", "Horario compatible con clases"],
+            descripcion: "Apoyo en maquetación HTML5 y CSS accesible. Incluye mentoría personalizada y beca económica mensual de $6,500 MXN."
+        },
+        {
+            id: 2,
+            titulo: "Auxiliar de Soporte Técnico Junior",
+            empresa: "Servicios Digitales Tonalá",
+            modalidad: "Híbrido",
+            ubicacion: "Tonalá, Jalisco",
+            experiencia: "Sin experiencia previa",
+            accesibilidad: ["Rampas y elevador", "Horario compatible con clases"],
+            descripcion: "Atención a tickets de soporte y mantenimiento preventivo de equipos. Capacitación pagada desde el primer día."
+        },
+        {
+            id: 3,
+            titulo: "Becario de Diseño de Interfaces (UI/UX)",
+            empresa: "Estudio Creativo Zapopan",
+            modalidad: "Remoto",
+            ubicacion: "Zapopan / Remoto",
+            experiencia: "0 años (Portafolio escolar aceptado)",
+            accesibilidad: ["Compatible con lector de pantalla", "Rampas y elevador"],
+            descripcion: "Creación de prototipos en Figma y pruebas de usabilidad. Valoramos proyectos académicos."
+        }
+    ];
 
-function showPage(pageId) {
-    document.querySelectorAll(".page").forEach(p => p.classList.add("hidden"));
-    document.getElementById(pageId).classList.remove("hidden");
-}
+    let vacantes = JSON.parse(localStorage.getItem("primerPasoVacantes")) || vacantesPorDefecto;
+    let vacanteSeleccionada = vacantes[0];
+    let usuarioActivo = JSON.parse(localStorage.getItem("primerPasoUsuario")) || null;
 
-function loadJobs() {
-    document.getElementById("job-list").innerHTML = jobs.map(job => `
-        <div class="job-card">
-            <h3>${job.title}</h3>
-            <p>${job.company}</p>
-            <a class="btn" onclick="showJobDetail(${job.id})">View Details</a>
+    function anunciar(mensaje) {
+        const anunciador = document.getElementById("anunciador-vivo");
+        anunciador.textContent = "";
+        setTimeout(() => { anunciador.textContent = mensaje; }, 50);
+    }
+
+    function actualizarInterfazSesion() {
+        const itemLogin = document.getElementById("item-nav-login");
+        const itemSesion = document.getElementById("item-nav-sesion");
+        const textoUsuario = document.getElementById("texto-usuario-activo");
+
+        if (usuarioActivo) {
+            itemLogin.classList.add("oculto");
+            itemSesion.classList.remove("oculto");
+            textoUsuario.textContent = `${usuarioActivo.nombre} (${usuarioActivo.rol})`;
+        } else {
+            itemLogin.classList.remove("oculto");
+            itemSesion.classList.add("oculto");
+            textoUsuario.textContent = "";
+        }
+    }
+
+    function mostrarVista(idVista) {
+        document.querySelectorAll(".vista").forEach(v => v.classList.add("oculto"));
+        const destino = document.getElementById(idVista);
+        destino.classList.remove("oculto");
+
+        document.querySelectorAll(".boton-nav").forEach(boton => {
+            if (boton.dataset.vista === idVista) {
+                boton.setAttribute("aria-current", "page");
+            } else {
+                boton.removeAttribute("aria-current");
+            }
+        });
+
+        if (idVista === "publicar" && usuarioActivo && usuarioActivo.rol.includes("Empresa")) {
+            document.getElementById("nombreEmpresa").value = usuarioActivo.nombre;
+        }
+
+        const principal = document.getElementById("contenido-principal");
+        principal.focus();
+        window.scrollTo(0, 0);
+    }
+
+    function crearTarjetaVacante(vacante) {
+        const etiquetasAcc = vacante.accesibilidad.map(item =>
+            `<span class="etiqueta etiqueta-accesible">✓ ${item}</span>`
+        ).join("");
+
+        return `
+    <article class="tarjeta-vacante">
+      <div>
+        <h3>${vacante.titulo}</h3>
+        <p class="nombre-empresa">${vacante.empresa} · ${vacante.ubicacion}</p>
+        <div class="etiquetas">
+          <span class="etiqueta">${vacante.modalidad}</span>
+          <span class="etiqueta">${vacante.experiencia}</span>
+          ${etiquetasAcc}
         </div>
-    `).join("");
+      </div>
+      <button type="button" class="boton" onclick="mostrarDetalleVacante(${vacante.id})">
+        Ver detalles de ${vacante.titulo}
+      </button>
+    </article>
+  `;
+    }
 
-    document.getElementById("featured-jobs").innerHTML = jobs.slice(0,2).map(job => `
-        <div class="job-card">
-            <h4>${job.title}</h4>
-            <p>${job.company}</p>
-        </div>
-    `).join("");
-}
-loadJobs();
+    function cargarVacantes() {
+        document.getElementById("vacantes-destacadas").innerHTML = vacantes.slice(0, 3).map(crearTarjetaVacante).join("");
+        filtrarVacantes();
+    }
 
-function searchJobs() {
-    let text = document.getElementById("searchInput").value.toLowerCase();
-    let filtered = jobs.filter(j => j.title.toLowerCase().includes(text));
-    document.getElementById("job-list").innerHTML = filtered.map(job => `
-        <div class="job-card">
-            <h3>${job.title}</h3>
-            <p>${job.company}</p>
-            <a class="btn" onclick="showJobDetail(${job.id})">View Details</a>
-        </div>
-    `).join("");
-}
+    function filtrarVacantes() {
+        const texto = document.getElementById("entradaBusqueda").value.toLowerCase().trim();
+        const modalidad = document.getElementById("filtroModalidad").value;
+        const accesibilidad = document.getElementById("filtroAccesibilidad").value;
 
-function showJobDetail(id) {
-    let job = jobs.find(j => j.id === id);
-    document.getElementById("job-detail-box").innerHTML = `
-        <h2>${job.title}</h2>
-        <h4>${job.company}</h4>
-        <p>${job.description}</p>
-    `;
-    showPage("job-detail");
-}
+        const filtradas = vacantes.filter(v => {
+            const coincideTexto = v.titulo.toLowerCase().includes(texto) || v.empresa.toLowerCase().includes(texto);
+            const coincideModalidad = modalidad === "todas" || v.modalidad === modalidad;
+            const coincideAcc = accesibilidad === "todas" || v.accesibilidad.includes(accesibilidad);
+            return coincideTexto && coincideModalidad && coincideAcc;
+        });
 
-function submitApplication(e) {
-    e.preventDefault();
-    alert("Application submitted!");
-}
+        const textoContador = `Mostrando ${filtradas.length} vacante${filtradas.length === 1 ? "" : "s"} disponible${filtradas.length === 1 ? "" : "s"}.`;
+        document.getElementById("contador-resultados").textContent = textoContador;
 
-function showDashboard() {
-    let userType = prompt("Type 'employer' or 'candidate'");
-    if (userType === "employer") showPage("employer-dashboard");
-    else showPage("candidate-dashboard");
-}
+        const elementoLista = document.getElementById("lista-vacantes");
+        if (filtradas.length === 0) {
+            elementoLista.innerHTML = `<p>No se encontraron vacantes con esos filtros. Intenta ampliar tu búsqueda.</p>`;
+        } else {
+            elementoLista.innerHTML = filtradas.map(crearTarjetaVacante).join("");
+        }
+    }
 
-function postJob(e) {
-    e.preventDefault();
-    let t = document.getElementById("jobTitle").value;
-    let c = document.getElementById("companyName").value;
-    let d = document.getElementById("jobDesc").value;
-    jobs.push({ id: jobs.length + 1, title: t, company: c, description: d });
-    alert("Job Posted Successfully!");
-    loadJobs();
-}
+    function mostrarDetalleVacante(id) {
+        vacanteSeleccionada = vacantes.find(v => v.id === id);
+        const listaAcc = vacanteSeleccionada.accesibilidad.map(a => `<li>${a}</li>`).join("");
+
+        document.getElementById("caja-detalle-vacante").innerHTML = `
+    <h2 id="titulo-detalle">${vacanteSeleccionada.titulo}</h2>
+    <p class="nombre-empresa">${vacanteSeleccionada.empresa} · ${vacanteSeleccionada.ubicacion} (${vacanteSeleccionada.modalidad})</p>
+    <p><strong>Requisito de experiencia:</strong> ${vacanteSeleccionada.experiencia}</p>
+    <h3>Descripción del puesto</h3>
+    <p>${vacanteSeleccionada.descripcion}</p>
+    <h3>Condiciones de accesibilidad verificadas</h3>
+    <ul>${listaAcc || "<li>Entorno estándar</li>"}</ul>
+  `;
+        mostrarVista("detalle-vacante");
+    }
+
+    function abrirFormularioPostulacion() {
+        document.getElementById("titulo-vacante-postulacion").textContent = `Vacante: ${vacanteSeleccionada.titulo} — ${vacanteSeleccionada.empresa}`;
+        document.getElementById("retroalimentacion-postulacion").innerHTML = "";
+
+        if (usuarioActivo) {
+            document.getElementById("nombrePostulante").value = usuarioActivo.nombre;
+            document.getElementById("correoPostulante").value = usuarioActivo.correo;
+        }
+
+        mostrarVista("postular");
+    }
+
+    function establecerErrorCampo(idEntrada, idError, mensaje) {
+        const entrada = document.getElementById(idEntrada);
+        const cajaError = document.getElementById(idError);
+        if (mensaje) {
+            entrada.setAttribute("aria-invalid", "true");
+            cajaError.textContent = `⚠ Error: ${mensaje}`;
+            cajaError.hidden = false;
+            return false;
+        } else {
+            entrada.removeAttribute("aria-invalid");
+            cajaError.textContent = "";
+            cajaError.hidden = true;
+            return true;
+        }
+    }
+
+    function enviarPostulacion(evento) {
+        evento.preventDefault();
+        const valorNombre = document.getElementById("nombrePostulante").value.trim();
+        const valorCorreo = document.getElementById("correoPostulante").value.trim();
+        const valorCarrera = document.getElementById("carreraPostulante").value.trim();
+
+        const v1 = establecerErrorCampo("nombrePostulante", "error-nombre", valorNombre ? "" : "Ingresa tu nombre completo para continuar.");
+        const v2 = establecerErrorCampo("correoPostulante", "error-correo", (valorCorreo && valorCorreo.includes("@")) ? "" : "Ingresa un correo electrónico válido (ejemplo: usuario@dominio.com).");
+        const v3 = establecerErrorCampo("carreraPostulante", "error-carrera", valorCarrera ? "" : "Indica tu carrera o área de estudios.");
+
+        if (!v1 || !v2 || !v3) {
+            const primerInvalido = document.querySelector("#formularioPostulacion [aria-invalid='true']");
+            if (primerInvalido) primerInvalido.focus();
+            return;
+        }
+
+        document.getElementById("retroalimentacion-postulacion").innerHTML = `
+    <div class="caja-alerta alerta-exito">
+      ✓ Postulación enviada con éxito para "${vacanteSeleccionada.titulo}". La empresa te contactará a ${valorCorreo}.
+    </div>
+  `;
+        document.getElementById("formularioPostulacion").reset();
+        anunciar("Postulación enviada correctamente.");
+    }
+
+    function publicarVacante(evento) {
+        evento.preventDefault();
+        const valorTitulo = document.getElementById("tituloPuesto").value.trim();
+        const valorEmpresa = document.getElementById("nombreEmpresa").value.trim();
+        const valorDescripcion = document.getElementById("descripcionPuesto").value.trim();
+        const valorModalidad = document.getElementById("modalidadPuesto").value;
+
+        const v1 = establecerErrorCampo("tituloPuesto", "error-titulo", valorTitulo ? "" : "Escribe el título de la vacante.");
+        const v2 = establecerErrorCampo("nombreEmpresa", "error-empresa", valorEmpresa ? "" : "Escribe el nombre de la empresa.");
+        const v3 = establecerErrorCampo("descripcionPuesto", "error-descripcion", valorDescripcion ? "" : "Agrega una breve descripción de las actividades.");
+
+        if (!v1 || !v2 || !v3) {
+            const primerInvalido = document.querySelector("#formularioPublicar [aria-invalid='true']");
+            if (primerInvalido) primerInvalido.focus();
+            return;
+        }
+
+        const casillasMarcadas = Array.from(document.querySelectorAll("input[name='caracteristicaAcc']:checked")).map(cb => cb.value);
+
+        const nuevaVacante = {
+            id: Date.now(),
+            titulo: valorTitulo,
+            empresa: valorEmpresa,
+            modalidad: valorModalidad,
+            ubicacion: "Área Metropolitana de Guadalajara",
+            experiencia: "0 años (Recién egresado / Practicante)",
+            accesibilidad: casillasMarcadas.length ? casillasMarcadas : ["Horario compatible con clases"],
+            descripcion: valorDescripcion
+        };
+
+        vacantes.unshift(nuevaVacante);
+        localStorage.setItem("primerPasoVacantes", JSON.stringify(vacantes));
+        cargarVacantes();
+
+        document.getElementById("retroalimentacion-publicar").innerHTML = `
+    <div class="caja-alerta alerta-exito">
+      ✓ Vacante "${valorTitulo}" publicada correctamente. Ya aparece en la sección de Vacantes.
+    </div>
+  `;
+        document.getElementById("formularioPublicar").reset();
+        anunciar("Nueva vacante publicada en el listado.");
+    }
+
+    function cambiarModoAuth(modo) {
+        const formLogin = document.getElementById("formularioLogin");
+        const formRegistro = document.getElementById("formularioRegistro");
+        const tabLogin = document.getElementById("tab-login");
+        const tabRegistro = document.getElementById("tab-registro");
+        document.getElementById("retroalimentacion-auth").innerHTML = "";
+
+        if (modo === "login") {
+            formLogin.classList.remove("oculto");
+            formRegistro.classList.add("oculto");
+            tabLogin.classList.remove("boton-secundario");
+            tabLogin.setAttribute("aria-selected", "true");
+            tabRegistro.classList.add("boton-secundario");
+            tabRegistro.setAttribute("aria-selected", "false");
+        } else {
+            formLogin.classList.add("oculto");
+            formRegistro.classList.remove("oculto");
+            tabRegistro.classList.remove("boton-secundario");
+            tabRegistro.setAttribute("aria-selected", "true");
+            tabLogin.classList.add("boton-secundario");
+            tabLogin.setAttribute("aria-selected", "false");
+        }
+    }
+
+    function alternarVisibilidadPass(idInput, boton) {
+        const input = document.getElementById(idInput);
+        if (input.type === "password") {
+            input.type = "text";
+            boton.textContent = "Ocultar";
+            boton.setAttribute("aria-pressed", "true");
+        } else {
+            input.type = "password";
+            boton.textContent = "Mostrar";
+            boton.setAttribute("aria-pressed", "false");
+        }
+    }
+
+    function iniciarSesionDemo(tipo) {
+        if (tipo === "estudiante") {
+            usuarioActivo = {
+                nombre: "Mateo Hernández",
+                correo: "mateo.hernandez@alumnos.udg.mx",
+                rol: "Estudiante"
+            };
+        } else {
+            usuarioActivo = {
+                nombre: "Tecnología Inclusiva Jalisco",
+                correo: "talento@tecinclusiva.mx",
+                rol: "Empresa"
+            };
+        }
+        localStorage.setItem("primerPasoUsuario", JSON.stringify(usuarioActivo));
+        actualizarInterfazSesion();
+        anunciar(`Sesión iniciada como ${usuarioActivo.nombre}.`);
+        mostrarVista("inicio");
+    }
+
+    function procesarLogin(evento) {
+        evento.preventDefault();
+        const correo = document.getElementById("loginCorreo").value.trim();
+        const pass = document.getElementById("loginContrasena").value.trim();
+
+        const v1 = establecerErrorCampo("loginCorreo", "error-login-correo", (correo && correo.includes("@")) ? "" : "Ingresa un correo electrónico válido.");
+        const v2 = establecerErrorCampo("loginContrasena", "error-login-pass", pass.length >= 6 ? "" : "La contraseña debe tener al menos 6 caracteres.");
+
+        if (!v1 || !v2) {
+            const primerInvalido = document.querySelector("#formularioLogin [aria-invalid='true']");
+            if (primerInvalido) primerInvalido.focus();
+            return;
+        }
+
+        const cuentasGuardadas = JSON.parse(localStorage.getItem("primerPasoCuentas")) || [];
+        const cuentaEncontrada = cuentasGuardadas.find(c => c.correo.toLowerCase() === correo.toLowerCase());
+
+        if (cuentaEncontrada) {
+            usuarioActivo = {
+                nombre: cuentaEncontrada.nombre,
+                correo: cuentaEncontrada.correo,
+                rol: cuentaEncontrada.rol
+            };
+        } else {
+            const nombreExtraido = correo.split("@")[0].replace(".", " ");
+            usuarioActivo = {
+                nombre: nombreExtraido.charAt(0).toUpperCase() + nombreExtraido.slice(1),
+                correo: correo,
+                rol: "Estudiante"
+            };
+        }
+
+        localStorage.setItem("primerPasoUsuario", JSON.stringify(usuarioActivo));
+        actualizarInterfazSesion();
+        document.getElementById("formularioLogin").reset();
+        anunciar(`Bienvenido, ${usuarioActivo.nombre}.`);
+        mostrarVista("inicio");
+    }
+
+    function procesarRegistro(evento) {
+        evento.preventDefault();
+        const nombre = document.getElementById("regNombre").value.trim();
+        const rol = document.getElementById("regRol").value;
+        const correo = document.getElementById("regCorreo").value.trim();
+        const pass = document.getElementById("regContrasena").value.trim();
+
+        const v1 = establecerErrorCampo("regNombre", "error-reg-nombre", nombre ? "" : "Escribe tu nombre completo o el de tu empresa.");
+        const v2 = establecerErrorCampo("regCorreo", "error-reg-correo", (correo && correo.includes("@")) ? "" : "Ingresa un correo electrónico válido.");
+        const v3 = establecerErrorCampo("regContrasena", "error-reg-pass", pass.length >= 6 ? "" : "Crea una contraseña de al menos 6 caracteres.");
+
+        if (!v1 || !v2 || !v3) {
+            const primerInvalido = document.querySelector("#formularioRegistro [aria-invalid='true']");
+            if (primerInvalido) primerInvalido.focus();
+            return;
+        }
+
+        const cuentasGuardadas = JSON.parse(localStorage.getItem("primerPasoCuentas")) || [];
+        cuentasGuardadas.push({ nombre, rol, correo });
+        localStorage.setItem("primerPasoCuentas", JSON.stringify(cuentasGuardadas));
+
+        usuarioActivo = { nombre, correo, rol };
+        localStorage.setItem("primerPasoUsuario", JSON.stringify(usuarioActivo));
+        actualizarInterfazSesion();
+        document.getElementById("formularioRegistro").reset();
+        anunciar(`Cuenta creada. Sesión iniciada como ${nombre}.`);
+        mostrarVista("inicio");
+    }
+
+    function cerrarSesion() {
+        usuarioActivo = null;
+        localStorage.removeItem("primerPasoUsuario");
+        actualizarInterfazSesion();
+        anunciar("Sesión cerrada correctamente.");
+        mostrarVista("inicio");
+    }
+
+    actualizarInterfazSesion();
+    cargarVacantes();
 </script>
 </body>
 </html>
