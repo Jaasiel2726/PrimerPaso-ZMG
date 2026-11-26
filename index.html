@@ -20,6 +20,12 @@
             --error-fondo: #FEE2E2;
             --error-texto: #7F1D1D;
             --anillo-foco: #D97706;
+            --etiqueta-fondo: #E2E8F0;
+            --etiqueta-texto: #0F172A;
+            --etiqueta-acc-fondo: #FEF3C7;
+            --etiqueta-acc-texto: #78350F;
+            --etiqueta-acc-borde: #B45309;
+            --demo-fondo: #EFF6FF;
         }
 
         * {
@@ -35,6 +41,50 @@
             font-size: 1rem;
         }
 
+        /* Preferencias de accesibilidad visual */
+        html.texto-grande {
+            font-size: 120%;
+        }
+
+        html.espaciado-lectura body {
+            letter-spacing: 0.06em;
+            word-spacing: 0.14em;
+            line-height: 1.85;
+        }
+
+        body.tema-tritanopia {
+            --color-primario: #064E3B;
+            --color-primario-hover: #047857;
+            --color-acento: #881337;
+            --anillo-foco: #BE123C;
+            --etiqueta-acc-fondo: #FFE4E6;
+            --etiqueta-acc-texto: #881337;
+            --etiqueta-acc-borde: #881337;
+            --demo-fondo: #ECFDF5;
+        }
+
+        body.tema-oscuro {
+            --fondo-principal: #0F172A;
+            --fondo-tarjeta: #1E293B;
+            --color-primario: #38BDF8;
+            --color-primario-hover: #7DD3FC;
+            --color-acento: #FBBF24;
+            --texto-principal: #F8FAFC;
+            --texto-secundario: #CBD5E1;
+            --borde-base: #64748B;
+            --exito-fondo: #064E3B;
+            --exito-texto: #A7F3D0;
+            --error-fondo: #450A0A;
+            --error-texto: #FECACA;
+            --anillo-foco: #FBBF24;
+            --etiqueta-fondo: #334155;
+            --etiqueta-texto: #F8FAFC;
+            --etiqueta-acc-fondo: #451A03;
+            --etiqueta-acc-texto: #FDE68A;
+            --etiqueta-acc-borde: #F59E0B;
+            --demo-fondo: #0F172A;
+        }
+
         .enlace-saltar {
             position: absolute;
             top: -100px;
@@ -46,6 +96,10 @@
             font-weight: 700;
             border-radius: 6px;
             text-decoration: none;
+        }
+
+        body.tema-oscuro .enlace-saltar {
+            color: #0F172A;
         }
 
         .enlace-saltar:focus {
@@ -61,6 +115,11 @@
             background-color: var(--color-primario);
             color: #FFFFFF;
             padding: 14px 12px;
+        }
+
+        body.tema-oscuro header {
+            background-color: #020617;
+            border-bottom: 2px solid var(--color-primario);
         }
 
         .contenedor-cabecera {
@@ -89,6 +148,11 @@
             padding: 3px 8px;
             border-radius: 4px;
             font-weight: 700;
+        }
+
+        body.tema-oscuro .etiqueta-ods {
+            background-color: var(--color-primario);
+            color: #0F172A;
         }
 
         nav ul {
@@ -120,6 +184,11 @@
         .boton-nav[aria-current="page"] {
             background-color: #FFFFFF;
             color: var(--color-primario);
+        }
+
+        body.tema-oscuro .boton-nav[aria-current="page"] {
+            background-color: var(--color-primario);
+            color: #0F172A;
         }
 
         .boton-nav-cuenta {
@@ -193,17 +262,39 @@
             text-decoration: none;
         }
 
+        body.tema-oscuro .boton {
+            color: #0F172A;
+            font-weight: 700;
+        }
+
         .boton:hover {
             background-color: var(--color-primario-hover);
+            border-color: var(--color-primario-hover);
         }
 
         .boton-secundario {
-            background-color: #FFFFFF;
+            background-color: var(--fondo-tarjeta);
             color: var(--color-primario);
         }
 
+        body.tema-oscuro .boton-secundario {
+            background-color: #0F172A;
+            color: var(--color-primario);
+            border-color: var(--color-primario);
+        }
+
         .boton-secundario:hover {
-            background-color: #EFF6FF;
+            background-color: var(--demo-fondo);
+        }
+
+        .boton-secundario[aria-pressed="true"] {
+            background-color: var(--color-primario);
+            color: #FFFFFF;
+            font-weight: 700;
+        }
+
+        body.tema-oscuro .boton-secundario[aria-pressed="true"] {
+            color: #0F172A;
         }
 
         .boton-pequeno {
@@ -227,6 +318,7 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            gap: 12px;
         }
 
         .tarjeta-vacante h3 {
@@ -249,8 +341,8 @@
         }
 
         .etiqueta {
-            background-color: #E2E8F0;
-            color: #0F172A;
+            background-color: var(--etiqueta-fondo);
+            color: var(--etiqueta-texto);
             font-size: 0.85rem;
             font-weight: 600;
             padding: 4px 10px;
@@ -261,9 +353,9 @@
         }
 
         .etiqueta-accesible {
-            background-color: #FEF3C7;
-            color: #78350F;
-            border: 1px solid #B45309;
+            background-color: var(--etiqueta-acc-fondo);
+            color: var(--etiqueta-acc-texto);
+            border: 1px solid var(--etiqueta-acc-borde);
         }
 
         .panel-filtros {
@@ -308,7 +400,7 @@
             font-size: 1rem;
             font-family: inherit;
             color: var(--texto-principal);
-            background-color: #FFFFFF;
+            background-color: var(--fondo-tarjeta);
         }
 
         .fila-contrasena {
@@ -325,7 +417,7 @@
         input[aria-invalid="true"],
         textarea[aria-invalid="true"] {
             border-color: var(--error-texto);
-            background-color: #FEF2F2;
+            background-color: var(--error-fondo);
         }
 
         .mensaje-error {
@@ -391,7 +483,7 @@
         }
 
         .caja-demo {
-            background-color: #EFF6FF;
+            background-color: var(--demo-fondo);
             border: 1.5px solid var(--color-primario);
             border-radius: 8px;
             padding: 16px;
@@ -418,6 +510,11 @@
             margin-top: 40px;
         }
 
+        body.tema-oscuro footer {
+            background-color: #020617;
+            border-top: 2px solid var(--color-primario);
+        }
+
         .contenedor-pie {
             max-width: 1100px;
             margin: 0 auto;
@@ -437,23 +534,6 @@
             cursor: pointer;
             padding: 4px;
             min-height: 44px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 16px 0;
-        }
-
-        th, td {
-            border: 1px solid var(--borde-base);
-            padding: 12px;
-            text-align: left;
-        }
-
-        th {
-            background-color: #E2E8F0;
-            color: #0F172A;
         }
     </style>
 </head>
@@ -716,7 +796,7 @@
             </ul>
 
             <h3>3. Cápsula informativa: Cómo prepararte para tu primera entrevista</h3>
-            <div style="background:#E2E8F0; padding:16px; border-radius:8px; margin-top:12px;">
+            <div style="background:var(--etiqueta-fondo); color:var(--etiqueta-texto); padding:16px; border-radius:8px; margin-top:12px;">
                 <p style="margin-top:0; font-weight:600;">Transcripción completa del audio/video de orientación (WCAG 1.2.2):</p>
                 <p style="margin-bottom:0;">"Al presentarte a tu primera entrevista sin experiencia previa, enfócate en tres puntos: tu capacidad para aprender rápido, un proyecto escolar del que te sientas orgulloso y tu disponibilidad real de horario. Recuerda preguntar qué capacitación inicial ofrece la empresa durante el primer mes."</p>
             </div>
@@ -724,43 +804,56 @@
     </section>
 
     <section id="accesibilidad" class="vista oculto" aria-labelledby="titulo-accesibilidad">
-        <div class="caja-panel">
-            <h2 id="titulo-accesibilidad">Declaración de Accesibilidad — PrimerPaso ZMG</h2>
-            <p>El equipo desarrollador de <strong>PrimerPaso ZMG</strong> se compromete a garantizar la accesibilidad digital para todas las personas, incluidas aquellas con discapacidad visual, auditiva, motriz o cognitiva, en alineación con el <strong>ODS 8 (Trabajo Decente)</strong> y las pautas <strong>WCAG 2.2 Nivel AA</strong> del W3C.</p>
+        <h2 id="titulo-accesibilidad">Herramientas de Accesibilidad Visual</h2>
+        <p>Personaliza la apariencia de <strong>PrimerPaso ZMG</strong> según tus necesidades visuales. Los ajustes se aplican en todas las secciones y se guardan automáticamente.</p>
 
-            <h3>Estado de conformidad</h3>
-            <p>Este sitio web es <strong>conforme con WCAG 2.2 Nivel AA</strong>. Se ha verificado mediante pruebas automáticas (WAVE, axe DevTools y Google Lighthouse) y pruebas manuales con teclado y lector de pantalla NVDA.</p>
+        <div class="rejilla-tarjetas" role="group" aria-label="Opciones de visualización accesible">
+            <article class="tarjeta-vacante">
+                <div>
+                    <h3>Modo Oscuro de Alto Contraste</h3>
+                    <p>Reduce el brillo de la pantalla utilizando fondo oscuro y texto claro para evitar fatiga visual.</p>
+                </div>
+                <button type="button" class="boton boton-secundario" id="btn-modo-oscuro" aria-pressed="false" onclick="alternarPreferenciaAcc('oscuro')">
+                    Activar modo oscuro
+                </button>
+            </article>
 
-            <h3>Medidas técnicas implementadas</h3>
-            <table>
-                <thead>
-                <tr>
-                    <th scope="col">Aspecto</th>
-                    <th scope="col">Implementación</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <td>Contraste de color</td>
-                    <td>Relación mínima de 7.4:1 en textos y botones (superando el 4.5:1 exigido por 1.4.3).</td>
-                </tr>
-                <tr>
-                    <td>Navegación por teclado</td>
-                    <td>Enlace "Saltar al contenido", foco visible de 3px y controles semánticos sin trampas de teclado.</td>
-                </tr>
-                <tr>
-                    <td>Formularios accesibles</td>
-                    <td>Etiquetas explícitas, instrucciones previas y mensajes de error asociados con <code>aria-describedby</code>.</td>
-                </tr>
-                <tr>
-                    <td>Adaptabilidad</td>
-                    <td>Soporte sin desplazamiento horizontal desde 320 px de ancho y zoom hasta 400 %.</td>
-                </tr>
-                </tbody>
-            </table>
+            <article class="tarjeta-vacante">
+                <div>
+                    <h3>Paleta Verde / Tritanopía</h3>
+                    <p>Sustituye los tonos azules por verde petróleo profundo y acentos carmesí de alto contraste para personas con dificultad al percibir el azul.</p>
+                </div>
+                <button type="button" class="boton boton-secundario" id="btn-modo-tritanopia" aria-pressed="false" onclick="alternarPreferenciaAcc('tritanopia')">
+                    Activar paleta verde
+                </button>
+            </article>
 
-            <h3>Limitaciones conocidas y contacto</h3>
-            <p>Al tratarse de un prototipo académico, las vacantes publicadas y las cuentas se almacenan temporalmente en la sesión del navegador (<code>localStorage</code>). Si encuentras alguna barrera de accesibilidad, contáctanos en: <strong>accesibilidad.primerpaso@alumnos.udg.mx</strong>.</p>
+            <article class="tarjeta-vacante">
+                <div>
+                    <h3>Texto Ampliado (120 %)</h3>
+                    <p>Incrementa el tamaño de toda la tipografía del portal para facilitar la lectura sin desplazamiento horizontal.</p>
+                </div>
+                <button type="button" class="boton boton-secundario" id="btn-texto-grande" aria-pressed="false" onclick="alternarPreferenciaAcc('textoGrande')">
+                    Aumentar tamaño de letra
+                </button>
+            </article>
+
+            <article class="tarjeta-vacante">
+                <div>
+                    <h3>Espaciado de Lectura (WCAG 1.4.12)</h3>
+                    <p>Amplía el interlineado y la separación entre letras y palabras para mejorar la legibilidad.</p>
+                </div>
+                <button type="button" class="boton boton-secundario" id="btn-espaciado" aria-pressed="false" onclick="alternarPreferenciaAcc('espaciado')">
+                    Activar espaciado amplio
+                </button>
+            </article>
+        </div>
+
+        <div style="display:flex; flex-wrap:wrap; align-items:center; gap:16px; margin-top:24px;">
+            <button type="button" class="boton" onclick="restablecerPreferenciasAcc()">
+                Restablecer valores predeterminados
+            </button>
+            <p id="estado-accesibilidad" role="status" aria-live="polite" style="font-weight:600; margin:0;"></p>
         </div>
     </section>
 
@@ -862,7 +955,7 @@
             <p style="margin:0; font-size:0.85rem; color:#CBD5E1;">Basado en la estructura base de <a href="https://github.com/shreyakamblef4-spec/job-board" style="color:#93C5FD;">shreyakamblef4-spec/job-board</a>, rediseñado para cumplimiento WCAG 2.2 AA y ODS 8.</p>
         </div>
         <div>
-            <button type="button" onclick="mostrarVista('accesibilidad')">Declaración de Accesibilidad</button>
+            <button type="button" onclick="mostrarVista('accesibilidad')">Herramientas de Accesibilidad</button>
             <button type="button" onclick="mostrarVista('guia')">Ayuda y Guía</button>
         </div>
     </div>
@@ -905,6 +998,94 @@
     let vacantes = JSON.parse(localStorage.getItem("primerPasoVacantes")) || vacantesPorDefecto;
     let vacanteSeleccionada = vacantes[0];
     let usuarioActivo = JSON.parse(localStorage.getItem("primerPasoUsuario")) || null;
+
+    const preferenciasAccConfig = {
+        oscuro: {
+            botonId: "btn-modo-oscuro",
+            elemento: () => document.body,
+            clase: "tema-oscuro",
+            claveStorage: "ppzmg_oscuro",
+            textoActivo: "Desactivar modo oscuro",
+            textoInactivo: "Activar modo oscuro",
+            nombreCorto: "Modo oscuro de alto contraste",
+            exclusivoCon: "tritanopia"
+        },
+        tritanopia: {
+            botonId: "btn-modo-tritanopia",
+            elemento: () => document.body,
+            clase: "tema-tritanopia",
+            claveStorage: "ppzmg_tritanopia",
+            textoActivo: "Desactivar paleta verde",
+            textoInactivo: "Activar paleta verde",
+            nombreCorto: "Paleta verde para tritanopía",
+            exclusivoCon: "oscuro"
+        },
+        textoGrande: {
+            botonId: "btn-texto-grande",
+            elemento: () => document.documentElement,
+            clase: "texto-grande",
+            claveStorage: "ppzmg_texto_grande",
+            textoActivo: "Restaurar tamaño normal",
+            textoInactivo: "Aumentar tamaño de letra",
+            nombreCorto: "Texto ampliado al 120 %"
+        },
+        espaciado: {
+            botonId: "btn-espaciado",
+            elemento: () => document.documentElement,
+            clase: "espaciado-lectura",
+            claveStorage: "ppzmg_espaciado",
+            textoActivo: "Desactivar espaciado amplio",
+            textoInactivo: "Activar espaciado amplio",
+            nombreCorto: "Espaciado amplio de lectura"
+        }
+    };
+
+    function aplicarPreferenciaAcc(clave, activo, anunciarCambio) {
+        const cfg = preferenciasAccConfig[clave];
+        if (!cfg) return;
+        const boton = document.getElementById(cfg.botonId);
+        const objetivo = cfg.elemento();
+
+        objetivo.classList.toggle(cfg.clase, activo);
+        if (boton) {
+            boton.setAttribute("aria-pressed", String(activo));
+            boton.textContent = activo ? cfg.textoActivo : cfg.textoInactivo;
+        }
+        localStorage.setItem(cfg.claveStorage, activo ? "1" : "0");
+
+        if (anunciarCambio) {
+            const msg = activo ? `${cfg.nombreCorto} activado.` : `${cfg.nombreCorto} desactivado.`;
+            const estado = document.getElementById("estado-accesibilidad");
+            if (estado) estado.textContent = msg;
+            anunciar(msg);
+        }
+    }
+
+    function alternarPreferenciaAcc(clave) {
+        const cfg = preferenciasAccConfig[clave];
+        if (!cfg) return;
+        const nuevoEstado = !cfg.elemento().classList.contains(cfg.clase);
+
+        if (nuevoEstado && cfg.exclusivoCon) {
+            aplicarPreferenciaAcc(cfg.exclusivoCon, false, false);
+        }
+        aplicarPreferenciaAcc(clave, nuevoEstado, true);
+    }
+
+    function restablecerPreferenciasAcc() {
+        Object.keys(preferenciasAccConfig).forEach(clave => aplicarPreferenciaAcc(clave, false, false));
+        const msg = "Configuración visual restablecida a valores predeterminados.";
+        const estado = document.getElementById("estado-accesibilidad");
+        if (estado) estado.textContent = msg;
+        anunciar(msg);
+    }
+
+    function cargarPreferenciasAcc() {
+        Object.keys(preferenciasAccConfig).forEach(clave => {
+            const activo = localStorage.getItem(preferenciasAccConfig[clave].claveStorage) === "1";
+            aplicarPreferenciaAcc(clave, activo, false);
+        });
+    }
 
     function anunciar(mensaje) {
         const anunciador = document.getElementById("anunciador-vivo");
@@ -1246,6 +1427,7 @@
         mostrarVista("inicio");
     }
 
+    cargarPreferenciasAcc();
     actualizarInterfazSesion();
     cargarVacantes();
 </script>
