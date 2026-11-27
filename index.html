@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PrimerPaso ZMG — Bolsa de Primer Empleo y Prácticas sin Experiencia (ODS 8)</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <style>
         :root {
             --fondo-principal: #F8FAFC;
@@ -41,7 +42,6 @@
             font-size: 1rem;
         }
 
-        /* Preferencias de accesibilidad visual */
         html.texto-grande {
             font-size: 120%;
         }
@@ -358,6 +358,12 @@
             border: 1px solid var(--etiqueta-acc-borde);
         }
 
+        .etiqueta-exito {
+            background-color: var(--exito-fondo);
+            color: var(--exito-texto);
+            border: 1px solid var(--exito-texto);
+        }
+
         .panel-filtros {
             background-color: var(--fondo-tarjeta);
             border: 1.5px solid var(--borde-base);
@@ -499,6 +505,32 @@
             padding-bottom: 12px;
         }
 
+        .hilo-mensajes {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 16px 0;
+        }
+
+        .burbuja-mensaje {
+            padding: 14px 16px;
+            border-radius: 8px;
+            border: 1.5px solid var(--borde-base);
+            background-color: var(--fondo-principal);
+        }
+
+        .burbuja-empresa {
+            background-color: var(--demo-fondo);
+            border-color: var(--color-primario);
+        }
+
+        .meta-mensaje {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--color-primario);
+            margin: 0 0 6px;
+        }
+
         .oculto {
             display: none;
         }
@@ -555,6 +587,7 @@
             <ul>
                 <li><button type="button" class="boton-nav" data-vista="inicio" aria-current="page" onclick="mostrarVista('inicio')">Inicio</button></li>
                 <li><button type="button" class="boton-nav" data-vista="vacantes" onclick="mostrarVista('vacantes')">Vacantes (0 Exp.)</button></li>
+                <li><button type="button" class="boton-nav" data-vista="mensajes" id="nav-btn-mensajes" onclick="mostrarVista('mensajes')">Mis Mensajes (1)</button></li>
                 <li><button type="button" class="boton-nav" data-vista="publicar" onclick="mostrarVista('publicar')">Publicar Vacante</button></li>
                 <li><button type="button" class="boton-nav" data-vista="guia" onclick="mostrarVista('guia')">Guía Primer Empleo</button></li>
                 <li><button type="button" class="boton-nav" data-vista="accesibilidad" onclick="mostrarVista('accesibilidad')">Accesibilidad</button></li>
@@ -585,8 +618,8 @@
                     <button type="button" class="boton" onclick="mostrarVista('vacantes')">
                         Explorar vacantes disponibles
                     </button>
-                    <button type="button" class="boton boton-secundario" onclick="mostrarVista('acceso')">
-                        Crear cuenta o iniciar sesión
+                    <button type="button" class="boton boton-secundario" onclick="mostrarVista('mensajes')">
+                        Ver mis postulaciones y mensajes
                     </button>
                 </div>
             </div>
@@ -647,6 +680,14 @@
         <div id="lista-vacantes" class="rejilla-tarjetas"></div>
     </section>
 
+    <section id="mensajes" class="vista oculto" aria-labelledby="titulo-mensajes">
+        <h2 id="titulo-mensajes">Mis Postulaciones y Mensajes con Empresas</h2>
+        <p>Consulta el estado de tus solicitudes, revisa las respuestas de los reclutadores y envía mensajes de seguimiento.</p>
+
+        <div id="retroalimentacion-mensajes" role="status" aria-live="polite"></div>
+        <div id="lista-hilos-mensajes" style="display:flex; flex-direction:column; gap:24px; margin-top:20px;"></div>
+    </section>
+
     <section id="detalle-vacante" class="vista oculto" aria-labelledby="titulo-detalle">
         <div class="caja-panel">
             <button type="button" class="boton boton-secundario" onclick="mostrarVista('vacantes')" style="margin-bottom:16px;">
@@ -691,8 +732,8 @@
                 </div>
 
                 <div class="grupo-formulario">
-                    <label for="ajustesPostulante">Ajustes razonables o accesibilidad requerida (opcional)</label>
-                    <span id="ayuda-ajustes" class="texto-ayuda">Indica si requieres software lector de pantalla, acceso sin escaleras o algún ajuste para tu entrevista.</span>
+                    <label for="ajustesPostulante">Mensaje para la empresa o ajustes razonables requeridos (opcional)</label>
+                    <span id="ayuda-ajustes" class="texto-ayuda">Preséntate brevemente o indica si requieres lector de pantalla, rampas o algún ajuste para tu entrevista.</span>
                     <textarea id="ajustesPostulante" rows="3" aria-describedby="ayuda-ajustes"></textarea>
                 </div>
 
@@ -962,6 +1003,10 @@
 </footer>
 
 <script>
+    if (typeof emailjs !== "undefined") {
+        emailjs.init("_L-07h3cQVEK4WZVT");
+    }
+
     const vacantesPorDefecto = [
         {
             id: 1,
@@ -995,7 +1040,36 @@
         }
     ];
 
+    const postulacionesPorDefecto = [
+        {
+            id: 101,
+            vacanteId: 2,
+            tituloVacante: "Auxiliar de Soporte Técnico Junior",
+            empresa: "Servicios Digitales Tonalá",
+            postulante: "Mateo Hernández",
+            correo: "mateo.hernandez@alumnos.udg.mx",
+            carrera: "Ingeniería en Ciencias Computacionales",
+            estado: "Respondida por la empresa",
+            respondida: true,
+            mensajes: [
+                {
+                    remitente: "Mateo Hernández (Tú)",
+                    esEmpresa: false,
+                    fecha: "Ayer · 10:15 a. m.",
+                    texto: "Hola, me interesa mucho la vacante. Actualmente curso 7.º semestre en CUTonalá por las tardes y solicito horario matutino."
+                },
+                {
+                    remitente: "Servicios Digitales Tonalá (Reclutamiento)",
+                    esEmpresa: true,
+                    fecha: "Hoy · 09:30 a. m.",
+                    texto: "¡Hola Mateo! Revisamos tu perfil y confirmamos que el turno matutino (8:00 a. m. a 1:00 p. m.) está disponible y nuestras oficinas cuentan con rampas y elevador. ¿Te parece bien una entrevista virtual este viernes?"
+                }
+            ]
+        }
+    ];
+
     let vacantes = JSON.parse(localStorage.getItem("primerPasoVacantes")) || vacantesPorDefecto;
+    let postulaciones = JSON.parse(localStorage.getItem("primerPasoPostulaciones")) || postulacionesPorDefecto;
     let vacanteSeleccionada = vacantes[0];
     let usuarioActivo = JSON.parse(localStorage.getItem("primerPasoUsuario")) || null;
 
@@ -1126,6 +1200,10 @@
             document.getElementById("nombreEmpresa").value = usuarioActivo.nombre;
         }
 
+        if (idVista === "mensajes") {
+            renderizarMensajes();
+        }
+
         const principal = document.getElementById("contenido-principal");
         principal.focus();
         window.scrollTo(0, 0);
@@ -1226,11 +1304,19 @@
         }
     }
 
+    function actualizarContadorMensajes() {
+        const btnNav = document.getElementById("nav-btn-mensajes");
+        if (btnNav) {
+            btnNav.textContent = `Mis Mensajes (${postulaciones.length})`;
+        }
+    }
+
     function enviarPostulacion(evento) {
         evento.preventDefault();
         const valorNombre = document.getElementById("nombrePostulante").value.trim();
         const valorCorreo = document.getElementById("correoPostulante").value.trim();
         const valorCarrera = document.getElementById("carreraPostulante").value.trim();
+        const valorAjustes = document.getElementById("ajustesPostulante").value.trim();
 
         const v1 = establecerErrorCampo("nombrePostulante", "error-nombre", valorNombre ? "" : "Ingresa tu nombre completo para continuar.");
         const v2 = establecerErrorCampo("correoPostulante", "error-correo", (valorCorreo && valorCorreo.includes("@")) ? "" : "Ingresa un correo electrónico válido (ejemplo: usuario@dominio.com).");
@@ -1242,13 +1328,162 @@
             return;
         }
 
+        const mensajeInicial = valorAjustes
+            ? `Postulación enviada (${valorCarrera}). Mensaje y ajustes solicitados: ${valorAjustes}`
+            : `Hola, envío mi postulación para la vacante de ${vacanteSeleccionada.titulo}. Formación: ${valorCarrera}.`;
+
+        const nuevaPostulacion = {
+            id: Date.now(),
+            vacanteId: vacanteSeleccionada.id,
+            tituloVacante: vacanteSeleccionada.titulo,
+            empresa: vacanteSeleccionada.empresa,
+            postulante: valorNombre,
+            correo: valorCorreo,
+            carrera: valorCarrera,
+            estado: "Enviada · En espera de respuesta",
+            respondida: false,
+            mensajes: [
+                {
+                    remitente: `${valorNombre} (Tú)`,
+                    esEmpresa: false,
+                    fecha: "Justo ahora",
+                    texto: mensajeInicial
+                }
+            ]
+        };
+
+        postulaciones.unshift(nuevaPostulacion);
+        localStorage.setItem("primerPasoPostulaciones", JSON.stringify(postulaciones));
+        actualizarContadorMensajes();
+
+        if (typeof emailjs !== "undefined") {
+            emailjs.send("service_2l5psxs", "template_2lmyq7y", {
+                nombre: valorNombre,
+                correo: valorCorreo,
+                vacante: vacanteSeleccionada.titulo,
+                empresa: vacanteSeleccionada.empresa,
+                carrera: valorCarrera,
+                mensaje: valorAjustes || "Sin ajustes adicionales"
+            }).catch(err => console.warn("Aviso EmailJS:", err));
+        }
+
         document.getElementById("retroalimentacion-postulacion").innerHTML = `
     <div class="caja-alerta alerta-exito">
-      ✓ Postulación enviada con éxito para "${vacanteSeleccionada.titulo}". La empresa te contactará a ${valorCorreo}.
+      <p style="margin:0 0 12px;">✓ Postulación enviada con éxito para "${vacanteSeleccionada.titulo}". Se envió confirmación a ${valorCorreo} y quedó guardada en Mis Mensajes.</p>
+      <button type="button" class="boton boton-secundario" onclick="mostrarVista('mensajes')">Ver en Mis Mensajes</button>
     </div>
   `;
         document.getElementById("formularioPostulacion").reset();
-        anunciar("Postulación enviada correctamente.");
+        anunciar("Postulación enviada correctamente y guardada en Mis Mensajes.");
+    }
+
+    function renderizarMensajes() {
+        const contenedor = document.getElementById("lista-hilos-mensajes");
+        if (!contenedor) return;
+
+        if (postulaciones.length === 0) {
+            contenedor.innerHTML = `<div class="caja-panel"><p>Aún no has enviado postulaciones. Explora las vacantes disponibles para iniciar una conversación.</p></div>`;
+            return;
+        }
+
+        contenedor.innerHTML = postulaciones.map(hilo => {
+            const claseEstado = hilo.respondida ? "etiqueta-exito" : "etiqueta-accesible";
+            const iconoEstado = hilo.respondida ? "✓" : "⏳";
+
+            const burbujas = hilo.mensajes.map(m => `
+                <div class="burbuja-mensaje ${m.esEmpresa ? "burbuja-empresa" : ""}">
+                    <p class="meta-mensaje">${m.remitente} · <span style="font-weight:400; color:var(--texto-secundario);">${m.fecha}</span></p>
+                    <p style="margin:0;">${m.texto}</p>
+                </div>
+            `).join("");
+
+            return `
+            <article class="caja-panel" style="max-width:100%; margin:0;" aria-labelledby="hilo-titulo-${hilo.id}">
+                <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:flex-start; gap:12px;">
+                    <div>
+                        <h3 id="hilo-titulo-${hilo.id}" style="margin:0 0 4px; color:var(--color-primario);">${hilo.tituloVacante}</h3>
+                        <p class="nombre-empresa" style="margin:0;">${hilo.empresa} · Candidato: ${hilo.postulante} (${hilo.correo})</p>
+                    </div>
+                    <span class="etiqueta ${claseEstado}">${iconoEstado} ${hilo.estado}</span>
+                </div>
+
+                <div class="hilo-mensajes" aria-label="Historial de mensajes con ${hilo.empresa}">
+                    ${burbujas}
+                </div>
+
+                <form onsubmit="enviarMensajeSeguimiento(event, ${hilo.id})" style="margin-top:12px;">
+                    <div class="grupo-formulario" style="margin-bottom:10px;">
+                        <label for="respuesta-input-${hilo.id}">Escribir mensaje de seguimiento para ${hilo.empresa}</label>
+                        <input type="text" id="respuesta-input-${hilo.id}" placeholder="Escribe una consulta o confirma tu disponibilidad de horario...">
+                    </div>
+                    <div style="display:flex; flex-wrap:wrap; gap:10px;">
+                        <button type="submit" class="boton">Enviar mensaje</button>
+                        <button type="button" class="boton boton-secundario" onclick="simularRespuestaEmpresa(${hilo.id})">
+                            Simular respuesta de la empresa
+                        </button>
+                    </div>
+                </form>
+            </article>
+            `;
+        }).join("");
+    }
+
+    function enviarMensajeSeguimiento(evento, idHilo) {
+        evento.preventDefault();
+        const input = document.getElementById(`respuesta-input-${idHilo}`);
+        const texto = input.value.trim();
+        if (!texto) {
+            input.focus();
+            return;
+        }
+
+        const hilo = postulaciones.find(p => p.id === idHilo);
+        if (!hilo) return;
+
+        const esRolEmpresa = usuarioActivo && usuarioActivo.rol.includes("Empresa");
+        const nombreRemitente = esRolEmpresa
+            ? `${usuarioActivo.nombre} (Empresa)`
+            : `${usuarioActivo ? usuarioActivo.nombre : hilo.postulante} (Tú)`;
+
+        hilo.mensajes.push({
+            remitente: nombreRemitente,
+            esEmpresa: esRolEmpresa,
+            fecha: "Justo ahora",
+            texto: texto
+        });
+
+        if (esRolEmpresa) {
+            hilo.respondida = true;
+            hilo.estado = "Respondida por la empresa";
+        }
+
+        localStorage.setItem("primerPasoPostulaciones", JSON.stringify(postulaciones));
+        renderizarMensajes();
+        document.getElementById("retroalimentacion-mensajes").innerHTML = `
+            <div class="caja-alerta alerta-exito">✓ Mensaje enviado en el hilo de "${hilo.tituloVacante}".</div>
+        `;
+        anunciar("Mensaje enviado correctamente.");
+    }
+
+    function simularRespuestaEmpresa(idHilo) {
+        const hilo = postulaciones.find(p => p.id === idHilo);
+        if (!hilo) return;
+
+        hilo.respondida = true;
+        hilo.estado = "Respondida por la empresa";
+        hilo.mensajes.push({
+            remitente: `${hilo.empresa} (Reclutamiento)`,
+            esEmpresa: true,
+            fecha: "Justo ahora",
+            texto: `¡Hola ${hilo.postulante}! Hemos recibido tu postulación y confirmamos todos los ajustes de accesibilidad y horario flexible para el puesto de ${hilo.tituloVacante}. Te esperamos en la entrevista inicial.`
+        });
+
+        localStorage.setItem("primerPasoPostulaciones", JSON.stringify(postulaciones));
+        renderizarMensajes();
+        document.getElementById("retroalimentacion-mensajes").innerHTML = `
+            <div class="caja-alerta alerta-exito">✓ Nueva respuesta recibida de ${hilo.empresa}.</div>
+        `;
+        anunciar(`La empresa ${hilo.empresa} ha respondido a tu postulación.`);
     }
 
     function publicarVacante(evento) {
@@ -1429,6 +1664,7 @@
 
     cargarPreferenciasAcc();
     actualizarInterfazSesion();
+    actualizarContadorMensajes();
     cargarVacantes();
 </script>
 </body>
