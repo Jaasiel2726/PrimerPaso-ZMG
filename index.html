@@ -1010,7 +1010,7 @@
     }
 
     // 2. CONEXIÓN A SUPABASE (PEGA TUS DOS CREDENCIALES AQUÍ)
-    const SUPABASE_URL = "https://qdccxqccykkzxqjuzudv.supabase.co/rest/v1/";
+    const SUPABASE_URL = "https://qdccxqccykkzxqjuzudv.supabase.co";
     const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_GK1KqQb2YFajXBdHbilTuA_g3UhcAtz";
     const db = (typeof window.supabase !== "undefined" && SUPABASE_URL.startsWith("http"))
         ? window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY)
