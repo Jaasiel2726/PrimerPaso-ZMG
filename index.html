@@ -6,6 +6,7 @@
     <title>PrimerPaso ZMG — Bolsa de Primer Empleo y Prácticas sin Experiencia (ODS 8)</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --fondo-principal: #F8FAFC;
@@ -587,7 +588,7 @@
             <ul>
                 <li><button type="button" class="boton-nav" data-vista="inicio" aria-current="page" onclick="mostrarVista('inicio')">Inicio</button></li>
                 <li><button type="button" class="boton-nav" data-vista="vacantes" onclick="mostrarVista('vacantes')">Vacantes (0 Exp.)</button></li>
-                <li><button type="button" class="boton-nav" data-vista="mensajes" id="nav-btn-mensajes" onclick="mostrarVista('mensajes')">Mis Mensajes (1)</button></li>
+                <li><button type="button" class="boton-nav" data-vista="mensajes" id="nav-btn-mensajes" onclick="mostrarVista('mensajes')">Mis Mensajes (0)</button></li>
                 <li><button type="button" class="boton-nav" data-vista="publicar" onclick="mostrarVista('publicar')">Publicar Vacante</button></li>
                 <li><button type="button" class="boton-nav" data-vista="guia" onclick="mostrarVista('guia')">Guía Primer Empleo</button></li>
                 <li><button type="button" class="boton-nav" data-vista="accesibilidad" onclick="mostrarVista('accesibilidad')">Accesibilidad</button></li>
@@ -1003,11 +1004,19 @@
 </footer>
 
 <script>
+    // 1. INICIALIZAR EMAILJS
     if (typeof emailjs !== "undefined") {
         emailjs.init("_L-07h3cQVEK4WZVT");
     }
 
-    const vacantesPorDefecto = [
+    // 2. CONEXIÓN A SUPABASE (PEGA TUS DOS CREDENCIALES AQUÍ)
+    const SUPABASE_URL = "https://qdccxqccykkzxqjuzudv.supabase.co/rest/v1/";
+    const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_GK1KqQb2YFajXBdHbilTuA_g3UhcAtz";
+    const db = (typeof window.supabase !== "undefined" && SUPABASE_URL.startsWith("http"))
+        ? window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY)
+        : null;
+
+    const vacantesRespaldo = [
         {
             id: 1,
             titulo: "Practicante de Desarrollo Web Frontend",
@@ -1017,60 +1026,12 @@
             experiencia: "0 años (Estudiantes activos)",
             accesibilidad: ["Compatible con lector de pantalla", "Horario compatible con clases"],
             descripcion: "Apoyo en maquetación HTML5 y CSS accesible. Incluye mentoría personalizada y beca económica mensual de $6,500 MXN."
-        },
-        {
-            id: 2,
-            titulo: "Auxiliar de Soporte Técnico Junior",
-            empresa: "Servicios Digitales Tonalá",
-            modalidad: "Híbrido",
-            ubicacion: "Tonalá, Jalisco",
-            experiencia: "Sin experiencia previa",
-            accesibilidad: ["Rampas y elevador", "Horario compatible con clases"],
-            descripcion: "Atención a tickets de soporte y mantenimiento preventivo de equipos. Capacitación pagada desde el primer día."
-        },
-        {
-            id: 3,
-            titulo: "Becario de Diseño de Interfaces (UI/UX)",
-            empresa: "Estudio Creativo Zapopan",
-            modalidad: "Remoto",
-            ubicacion: "Zapopan / Remoto",
-            experiencia: "0 años (Portafolio escolar aceptado)",
-            accesibilidad: ["Compatible con lector de pantalla", "Rampas y elevador"],
-            descripcion: "Creación de prototipos en Figma y pruebas de usabilidad. Valoramos proyectos académicos."
         }
     ];
 
-    const postulacionesPorDefecto = [
-        {
-            id: 101,
-            vacanteId: 2,
-            tituloVacante: "Auxiliar de Soporte Técnico Junior",
-            empresa: "Servicios Digitales Tonalá",
-            postulante: "Mateo Hernández",
-            correo: "mateo.hernandez@alumnos.udg.mx",
-            carrera: "Ingeniería en Ciencias Computacionales",
-            estado: "Respondida por la empresa",
-            respondida: true,
-            mensajes: [
-                {
-                    remitente: "Mateo Hernández (Tú)",
-                    esEmpresa: false,
-                    fecha: "Ayer · 10:15 a. m.",
-                    texto: "Hola, me interesa mucho la vacante. Actualmente curso 7.º semestre en CUTonalá por las tardes y solicito horario matutino."
-                },
-                {
-                    remitente: "Servicios Digitales Tonalá (Reclutamiento)",
-                    esEmpresa: true,
-                    fecha: "Hoy · 09:30 a. m.",
-                    texto: "¡Hola Mateo! Revisamos tu perfil y confirmamos que el turno matutino (8:00 a. m. a 1:00 p. m.) está disponible y nuestras oficinas cuentan con rampas y elevador. ¿Te parece bien una entrevista virtual este viernes?"
-                }
-            ]
-        }
-    ];
-
-    let vacantes = JSON.parse(localStorage.getItem("primerPasoVacantes")) || vacantesPorDefecto;
-    let postulaciones = JSON.parse(localStorage.getItem("primerPasoPostulaciones")) || postulacionesPorDefecto;
-    let vacanteSeleccionada = vacantes[0];
+    let vacantes = [];
+    let postulaciones = [];
+    let vacanteSeleccionada = null;
     let usuarioActivo = JSON.parse(localStorage.getItem("primerPasoUsuario")) || null;
 
     const preferenciasAccConfig = {
@@ -1201,7 +1162,7 @@
         }
 
         if (idVista === "mensajes") {
-            renderizarMensajes();
+            cargarPostulacionesDesdeBD();
         }
 
         const principal = document.getElementById("contenido-principal");
@@ -1210,7 +1171,8 @@
     }
 
     function crearTarjetaVacante(vacante) {
-        const etiquetasAcc = vacante.accesibilidad.map(item =>
+        const listaAcc = Array.isArray(vacante.accesibilidad) ? vacante.accesibilidad : [];
+        const etiquetasAcc = listaAcc.map(item =>
             `<span class="etiqueta etiqueta-accesible">✓ ${item}</span>`
         ).join("");
 
@@ -1232,7 +1194,27 @@
   `;
     }
 
-    function cargarVacantes() {
+    async function cargarVacantes() {
+        if (!db) {
+            vacantes = vacantesRespaldo;
+        } else {
+            const { data, error } = await db
+                .from("vacantes")
+                .select("*")
+                .order("id", { ascending: false });
+
+            if (error || !data) {
+                console.error("Error cargando vacantes:", error);
+                vacantes = vacantesRespaldo;
+            } else {
+                vacantes = data;
+            }
+        }
+
+        if (vacantes.length > 0 && !vacanteSeleccionada) {
+            vacanteSeleccionada = vacantes[0];
+        }
+
         document.getElementById("vacantes-destacadas").innerHTML = vacantes.slice(0, 3).map(crearTarjetaVacante).join("");
         filtrarVacantes();
     }
@@ -1243,9 +1225,10 @@
         const accesibilidad = document.getElementById("filtroAccesibilidad").value;
 
         const filtradas = vacantes.filter(v => {
+            const listaAcc = Array.isArray(v.accesibilidad) ? v.accesibilidad : [];
             const coincideTexto = v.titulo.toLowerCase().includes(texto) || v.empresa.toLowerCase().includes(texto);
             const coincideModalidad = modalidad === "todas" || v.modalidad === modalidad;
-            const coincideAcc = accesibilidad === "todas" || v.accesibilidad.includes(accesibilidad);
+            const coincideAcc = accesibilidad === "todas" || listaAcc.includes(accesibilidad);
             return coincideTexto && coincideModalidad && coincideAcc;
         });
 
@@ -1262,7 +1245,9 @@
 
     function mostrarDetalleVacante(id) {
         vacanteSeleccionada = vacantes.find(v => v.id === id);
-        const listaAcc = vacanteSeleccionada.accesibilidad.map(a => `<li>${a}</li>`).join("");
+        if (!vacanteSeleccionada) return;
+        const listaAcc = (Array.isArray(vacanteSeleccionada.accesibilidad) ? vacanteSeleccionada.accesibilidad : [])
+            .map(a => `<li>${a}</li>`).join("");
 
         document.getElementById("caja-detalle-vacante").innerHTML = `
     <h2 id="titulo-detalle">${vacanteSeleccionada.titulo}</h2>
@@ -1311,7 +1296,21 @@
         }
     }
 
-    function enviarPostulacion(evento) {
+    async function cargarPostulacionesDesdeBD() {
+        if (!db) return;
+        const { data, error } = await db
+            .from("postulaciones")
+            .select("*, mensajes(*)")
+            .order("id", { ascending: false });
+
+        if (!error && data) {
+            postulaciones = data;
+            actualizarContadorMensajes();
+            renderizarMensajes();
+        }
+    }
+
+    async function enviarPostulacion(evento) {
         evento.preventDefault();
         const valorNombre = document.getElementById("nombrePostulante").value.trim();
         const valorCorreo = document.getElementById("correoPostulante").value.trim();
@@ -1332,29 +1331,41 @@
             ? `Postulación enviada (${valorCarrera}). Mensaje y ajustes solicitados: ${valorAjustes}`
             : `Hola, envío mi postulación para la vacante de ${vacanteSeleccionada.titulo}. Formación: ${valorCarrera}.`;
 
-        const nuevaPostulacion = {
-            id: Date.now(),
-            vacanteId: vacanteSeleccionada.id,
-            tituloVacante: vacanteSeleccionada.titulo,
-            empresa: vacanteSeleccionada.empresa,
-            postulante: valorNombre,
-            correo: valorCorreo,
-            carrera: valorCarrera,
-            estado: "Enviada · En espera de respuesta",
-            respondida: false,
-            mensajes: [
-                {
-                    remitente: `${valorNombre} (Tú)`,
-                    esEmpresa: false,
-                    fecha: "Justo ahora",
-                    texto: mensajeInicial
-                }
-            ]
-        };
+        if (!db) {
+            document.getElementById("retroalimentacion-postulacion").innerHTML = `
+                <div class="caja-alerta alerta-error">⚠ Falta configurar SUPABASE_URL y SUPABASE_PUBLISHABLE_KEY en el código.</div>
+            `;
+            return;
+        }
 
-        postulaciones.unshift(nuevaPostulacion);
-        localStorage.setItem("primerPasoPostulaciones", JSON.stringify(postulaciones));
-        actualizarContadorMensajes();
+        const { data: postInsertada, error: errPost } = await db
+            .from("postulaciones")
+            .insert([{
+                vacante_id: vacanteSeleccionada.id,
+                titulo_vacante: vacanteSeleccionada.titulo,
+                empresa: vacanteSeleccionada.empresa,
+                postulante: valorNombre,
+                correo: valorCorreo,
+                carrera: valorCarrera,
+                estado: "Enviada · En espera de respuesta",
+                respondida: false
+            }])
+            .select()
+            .single();
+
+        if (errPost) {
+            document.getElementById("retroalimentacion-postulacion").innerHTML = `
+                <div class="caja-alerta alerta-error">⚠ No se pudo guardar en Supabase: ${errPost.message}</div>
+            `;
+            return;
+        }
+
+        await db.from("mensajes").insert([{
+            postulacion_id: postInsertada.id,
+            remitente: `${valorNombre} (Tú)`,
+            es_empresa: false,
+            texto: mensajeInicial
+        }]);
 
         if (typeof emailjs !== "undefined") {
             emailjs.send("service_2l5psxs", "template_2lmyq7y", {
@@ -1367,14 +1378,16 @@
             }).catch(err => console.warn("Aviso EmailJS:", err));
         }
 
+        await cargarPostulacionesDesdeBD();
+
         document.getElementById("retroalimentacion-postulacion").innerHTML = `
-    <div class="caja-alerta alerta-exito">
-      <p style="margin:0 0 12px;">✓ Postulación enviada con éxito para "${vacanteSeleccionada.titulo}". Se envió confirmación a ${valorCorreo} y quedó guardada en Mis Mensajes.</p>
-      <button type="button" class="boton boton-secundario" onclick="mostrarVista('mensajes')">Ver en Mis Mensajes</button>
-    </div>
-  `;
+            <div class="caja-alerta alerta-exito">
+              <p style="margin:0 0 12px;">✓ Postulación guardada en la base de datos para "${vacanteSeleccionada.titulo}". Se envió confirmación a ${valorCorreo} y quedó registrada en Mis Mensajes.</p>
+              <button type="button" class="boton boton-secundario" onclick="mostrarVista('mensajes')">Ver en Mis Mensajes</button>
+            </div>
+        `;
         document.getElementById("formularioPostulacion").reset();
-        anunciar("Postulación enviada correctamente y guardada en Mis Mensajes.");
+        anunciar("Postulación enviada correctamente y guardada en Supabase.");
     }
 
     function renderizarMensajes() {
@@ -1382,26 +1395,30 @@
         if (!contenedor) return;
 
         if (postulaciones.length === 0) {
-            contenedor.innerHTML = `<div class="caja-panel"><p>Aún no has enviado postulaciones. Explora las vacantes disponibles para iniciar una conversación.</p></div>`;
+            contenedor.innerHTML = `<div class="caja-panel"><p>Aún no hay postulaciones registradas en la base de datos. Explora las vacantes disponibles para iniciar una conversación.</p></div>`;
             return;
         }
 
         contenedor.innerHTML = postulaciones.map(hilo => {
             const claseEstado = hilo.respondida ? "etiqueta-exito" : "etiqueta-accesible";
             const iconoEstado = hilo.respondida ? "✓" : "⏳";
+            const listaMensajes = (hilo.mensajes || []).sort((a, b) => a.id - b.id);
 
-            const burbujas = hilo.mensajes.map(m => `
-                <div class="burbuja-mensaje ${m.esEmpresa ? "burbuja-empresa" : ""}">
-                    <p class="meta-mensaje">${m.remitente} · <span style="font-weight:400; color:var(--texto-secundario);">${m.fecha}</span></p>
+            const burbujas = listaMensajes.map(m => {
+                const hora = m.creado_en ? new Date(m.creado_en).toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" }) : "Reciente";
+                return `
+                <div class="burbuja-mensaje ${m.es_empresa ? "burbuja-empresa" : ""}">
+                    <p class="meta-mensaje">${m.remitente} · <span style="font-weight:400; color:var(--texto-secundario);">${hora}</span></p>
                     <p style="margin:0;">${m.texto}</p>
                 </div>
-            `).join("");
+            `;
+            }).join("");
 
             return `
             <article class="caja-panel" style="max-width:100%; margin:0;" aria-labelledby="hilo-titulo-${hilo.id}">
                 <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:flex-start; gap:12px;">
                     <div>
-                        <h3 id="hilo-titulo-${hilo.id}" style="margin:0 0 4px; color:var(--color-primario);">${hilo.tituloVacante}</h3>
+                        <h3 id="hilo-titulo-${hilo.id}" style="margin:0 0 4px; color:var(--color-primario);">${hilo.titulo_vacante}</h3>
                         <p class="nombre-empresa" style="margin:0;">${hilo.empresa} · Candidato: ${hilo.postulante} (${hilo.correo})</p>
                     </div>
                     <span class="etiqueta ${claseEstado}">${iconoEstado} ${hilo.estado}</span>
@@ -1428,8 +1445,9 @@
         }).join("");
     }
 
-    function enviarMensajeSeguimiento(evento, idHilo) {
+    async function enviarMensajeSeguimiento(evento, idHilo) {
         evento.preventDefault();
+        if (!db) return;
         const input = document.getElementById(`respuesta-input-${idHilo}`);
         const texto = input.value.trim();
         if (!texto) {
@@ -1445,48 +1463,52 @@
             ? `${usuarioActivo.nombre} (Empresa)`
             : `${usuarioActivo ? usuarioActivo.nombre : hilo.postulante} (Tú)`;
 
-        hilo.mensajes.push({
+        await db.from("mensajes").insert([{
+            postulacion_id: idHilo,
             remitente: nombreRemitente,
-            esEmpresa: esRolEmpresa,
-            fecha: "Justo ahora",
+            es_empresa: esRolEmpresa,
             texto: texto
-        });
+        }]);
 
         if (esRolEmpresa) {
-            hilo.respondida = true;
-            hilo.estado = "Respondida por la empresa";
+            await db.from("postulaciones").update({
+                respondida: true,
+                estado: "Respondida por la empresa"
+            }).eq("id", idHilo);
         }
 
-        localStorage.setItem("primerPasoPostulaciones", JSON.stringify(postulaciones));
-        renderizarMensajes();
+        await cargarPostulacionesDesdeBD();
         document.getElementById("retroalimentacion-mensajes").innerHTML = `
-            <div class="caja-alerta alerta-exito">✓ Mensaje enviado en el hilo de "${hilo.tituloVacante}".</div>
+            <div class="caja-alerta alerta-exito">✓ Mensaje guardado en el hilo de "${hilo.titulo_vacante}".</div>
         `;
         anunciar("Mensaje enviado correctamente.");
     }
 
-    function simularRespuestaEmpresa(idHilo) {
+    async function simularRespuestaEmpresa(idHilo) {
+        if (!db) return;
         const hilo = postulaciones.find(p => p.id === idHilo);
         if (!hilo) return;
 
-        hilo.respondida = true;
-        hilo.estado = "Respondida por la empresa";
-        hilo.mensajes.push({
+        await db.from("mensajes").insert([{
+            postulacion_id: idHilo,
             remitente: `${hilo.empresa} (Reclutamiento)`,
-            esEmpresa: true,
-            fecha: "Justo ahora",
-            texto: `¡Hola ${hilo.postulante}! Hemos recibido tu postulación y confirmamos todos los ajustes de accesibilidad y horario flexible para el puesto de ${hilo.tituloVacante}. Te esperamos en la entrevista inicial.`
-        });
+            es_empresa: true,
+            texto: `¡Hola ${hilo.postulante}! Hemos recibido tu postulación en nuestra base de datos y confirmamos todos los ajustes de accesibilidad y horario flexible para el puesto de ${hilo.titulo_vacante}. Te esperamos en la entrevista inicial.`
+        }]);
 
-        localStorage.setItem("primerPasoPostulaciones", JSON.stringify(postulaciones));
-        renderizarMensajes();
+        await db.from("postulaciones").update({
+            respondida: true,
+            estado: "Respondida por la empresa"
+        }).eq("id", idHilo);
+
+        await cargarPostulacionesDesdeBD();
         document.getElementById("retroalimentacion-mensajes").innerHTML = `
-            <div class="caja-alerta alerta-exito">✓ Nueva respuesta recibida de ${hilo.empresa}.</div>
+            <div class="caja-alerta alerta-exito">✓ Nueva respuesta guardada de ${hilo.empresa}.</div>
         `;
         anunciar(`La empresa ${hilo.empresa} ha respondido a tu postulación.`);
     }
 
-    function publicarVacante(evento) {
+    async function publicarVacante(evento) {
         evento.preventDefault();
         const valorTitulo = document.getElementById("tituloPuesto").value.trim();
         const valorEmpresa = document.getElementById("nombreEmpresa").value.trim();
@@ -1503,10 +1525,16 @@
             return;
         }
 
+        if (!db) {
+            document.getElementById("retroalimentacion-publicar").innerHTML = `
+                <div class="caja-alerta alerta-error">⚠ Falta configurar SUPABASE_URL y SUPABASE_PUBLISHABLE_KEY en el código.</div>
+            `;
+            return;
+        }
+
         const casillasMarcadas = Array.from(document.querySelectorAll("input[name='caracteristicaAcc']:checked")).map(cb => cb.value);
 
-        const nuevaVacante = {
-            id: Date.now(),
+        const { error } = await db.from("vacantes").insert([{
             titulo: valorTitulo,
             empresa: valorEmpresa,
             modalidad: valorModalidad,
@@ -1514,19 +1542,24 @@
             experiencia: "0 años (Recién egresado / Practicante)",
             accesibilidad: casillasMarcadas.length ? casillasMarcadas : ["Horario compatible con clases"],
             descripcion: valorDescripcion
-        };
+        }]);
 
-        vacantes.unshift(nuevaVacante);
-        localStorage.setItem("primerPasoVacantes", JSON.stringify(vacantes));
-        cargarVacantes();
+        if (error) {
+            document.getElementById("retroalimentacion-publicar").innerHTML = `
+                <div class="caja-alerta alerta-error">⚠ Error al publicar en Supabase: ${error.message}</div>
+            `;
+            return;
+        }
+
+        await cargarVacantes();
 
         document.getElementById("retroalimentacion-publicar").innerHTML = `
-    <div class="caja-alerta alerta-exito">
-      ✓ Vacante "${valorTitulo}" publicada correctamente. Ya aparece en la sección de Vacantes.
-    </div>
-  `;
+            <div class="caja-alerta alerta-exito">
+              ✓ Vacante "${valorTitulo}" guardada en la base de datos. Ya es visible para todos los usuarios.
+            </div>
+        `;
         document.getElementById("formularioPublicar").reset();
-        anunciar("Nueva vacante publicada en el listado.");
+        anunciar("Nueva vacante publicada en la base de datos.");
     }
 
     function cambiarModoAuth(modo) {
@@ -1664,8 +1697,8 @@
 
     cargarPreferenciasAcc();
     actualizarInterfazSesion();
-    actualizarContadorMensajes();
     cargarVacantes();
+    cargarPostulacionesDesdeBD();
 </script>
 </body>
 </html>
