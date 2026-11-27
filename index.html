@@ -41,6 +41,9 @@
             color: var(--texto-principal);
             line-height: 1.6;
             font-size: 1rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
         html.texto-grande {
@@ -209,9 +212,11 @@
         }
 
         main {
+            width: 100%;
             max-width: 1100px;
             margin: 0 auto;
             padding: 24px 16px 48px;
+            flex: 1 0 auto;
         }
 
         .portada {
