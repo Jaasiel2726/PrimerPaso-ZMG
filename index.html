@@ -568,6 +568,663 @@
             min-height: 44px;
         }
     </style>
+    <script>
+        const SUPABASE_URL = "https://qdccxqccykkzxqjuzudv.supabase.co/rest/v1/";
+        const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_GK1KqQb2YFajXBdHbilTuA_g3UhcAtz";
+        const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+        const vacantesRespaldo = [
+            {
+                id: 1,
+                titulo: "Practicante de Desarrollo Web Frontend",
+                empresa: "Tecnología Inclusiva Jalisco",
+                modalidad: "Remoto",
+                ubicacion: "Guadalajara / Remoto",
+                experiencia: "0 años (Estudiantes activos)",
+                accesibilidad: ["Compatible con lector de pantalla", "Horario compatible con clases"],
+                descripcion: "Apoyo en maquetación HTML5 y CSS accesible. Incluye mentoría personalizada y beca económica mensual de $6,500 MXN."
+            }
+        ];
+
+        let vacantes = [];
+        let postulaciones = [];
+        let vacanteSeleccionada = null;
+        let usuarioActivo = JSON.parse(localStorage.getItem("primerPasoUsuario")) || null;
+
+        const preferenciasAccConfig = {
+            oscuro: {
+                botonId: "btn-modo-oscuro",
+                elemento: () => document.body,
+                clase: "tema-oscuro",
+                claveStorage: "ppzmg_oscuro",
+                textoActivo: "Desactivar modo oscuro",
+                textoInactivo: "Activar modo oscuro",
+                nombreCorto: "Modo oscuro de alto contraste",
+                exclusivoCon: "tritanopia"
+            },
+            tritanopia: {
+                botonId: "btn-modo-tritanopia",
+                elemento: () => document.body,
+                clase: "tema-tritanopia",
+                claveStorage: "ppzmg_tritanopia",
+                textoActivo: "Desactivar paleta verde",
+                textoInactivo: "Activar paleta verde",
+                nombreCorto: "Paleta verde para tritanopía",
+                exclusivoCon: "oscuro"
+            },
+            textoGrande: {
+                botonId: "btn-texto-grande",
+                elemento: () => document.documentElement,
+                clase: "texto-grande",
+                claveStorage: "ppzmg_texto_grande",
+                textoActivo: "Restaurar tamaño normal",
+                textoInactivo: "Aumentar tamaño de letra",
+                nombreCorto: "Texto ampliado al 120 %"
+            },
+            espaciado: {
+                botonId: "btn-espaciado",
+                elemento: () => document.documentElement,
+                clase: "espaciado-lectura",
+                claveStorage: "ppzmg_espaciado",
+                textoActivo: "Desactivar espaciado amplio",
+                textoInactivo: "Activar espaciado amplio",
+                nombreCorto: "Espaciado amplio de lectura"
+            }
+        };
+
+        function aplicarPreferenciaAcc(clave, activo, anunciarCambio) {
+            const cfg = preferenciasAccConfig[clave];
+            if (!cfg) return;
+            const boton = document.getElementById(cfg.botonId);
+            const objetivo = cfg.elemento();
+
+            objetivo.classList.toggle(cfg.clase, activo);
+            if (boton) {
+                boton.setAttribute("aria-pressed", String(activo));
+                boton.textContent = activo ? cfg.textoActivo : cfg.textoInactivo;
+            }
+            localStorage.setItem(cfg.claveStorage, activo ? "1" : "0");
+
+            if (anunciarCambio) {
+                const msg = activo ? `${cfg.nombreCorto} activado.` : `${cfg.nombreCorto} desactivado.`;
+                const estado = document.getElementById("estado-accesibilidad");
+                if (estado) estado.textContent = msg;
+                anunciar(msg);
+            }
+        }
+
+        function alternarPreferenciaAcc(clave) {
+            const cfg = preferenciasAccConfig[clave];
+            if (!cfg) return;
+            const nuevoEstado = !cfg.elemento().classList.contains(cfg.clase);
+
+            if (nuevoEstado && cfg.exclusivoCon) {
+                aplicarPreferenciaAcc(cfg.exclusivoCon, false, false);
+            }
+            aplicarPreferenciaAcc(clave, nuevoEstado, true);
+        }
+
+        function restablecerPreferenciasAcc() {
+            Object.keys(preferenciasAccConfig).forEach(clave => aplicarPreferenciaAcc(clave, false, false));
+            const msg = "Configuración visual restablecida a valores predeterminados.";
+            const estado = document.getElementById("estado-accesibilidad");
+            if (estado) estado.textContent = msg;
+            anunciar(msg);
+        }
+
+        function cargarPreferenciasAcc() {
+            Object.keys(preferenciasAccConfig).forEach(clave => {
+                const activo = localStorage.getItem(preferenciasAccConfig[clave].claveStorage) === "1";
+                aplicarPreferenciaAcc(clave, activo, false);
+            });
+        }
+
+        function anunciar(mensaje) {
+            const anunciador = document.getElementById("anunciador-vivo");
+            anunciador.textContent = "";
+            setTimeout(() => { anunciador.textContent = mensaje; }, 50);
+        }
+
+        function actualizarInterfazSesion() {
+            const itemLogin = document.getElementById("item-nav-login");
+            const itemSesion = document.getElementById("item-nav-sesion");
+            const textoUsuario = document.getElementById("texto-usuario-activo");
+
+            if (usuarioActivo) {
+                itemLogin.classList.add("oculto");
+                itemSesion.classList.remove("oculto");
+                textoUsuario.textContent = `${usuarioActivo.nombre} (${usuarioActivo.rol})`;
+            } else {
+                itemLogin.classList.remove("oculto");
+                itemSesion.classList.add("oculto");
+                textoUsuario.textContent = "";
+            }
+        }
+
+        function mostrarVista(idVista) {
+            document.querySelectorAll(".vista").forEach(v => v.classList.add("oculto"));
+            const destino = document.getElementById(idVista);
+            destino.classList.remove("oculto");
+
+            document.querySelectorAll(".boton-nav").forEach(boton => {
+                if (boton.dataset.vista === idVista) {
+                    boton.setAttribute("aria-current", "page");
+                } else {
+                    boton.removeAttribute("aria-current");
+                }
+            });
+
+            if (idVista === "publicar" && usuarioActivo && usuarioActivo.rol.includes("Empresa")) {
+                document.getElementById("nombreEmpresa").value = usuarioActivo.nombre;
+            }
+
+            if (idVista === "mensajes") {
+                cargarPostulacionesDesdeBD();
+            }
+
+            const principal = document.getElementById("contenido-principal");
+            principal.focus();
+            window.scrollTo(0, 0);
+        }
+
+        function crearTarjetaVacante(vacante) {
+            const listaAcc = Array.isArray(vacante.accesibilidad) ? vacante.accesibilidad : [];
+            const etiquetasAcc = listaAcc.map(item =>
+                `<span class="etiqueta etiqueta-accesible">✓ ${item}</span>`
+            ).join("");
+
+            return `
+    <article class="tarjeta-vacante">
+      <div>
+        <h3>${vacante.titulo}</h3>
+        <p class="nombre-empresa">${vacante.empresa} · ${vacante.ubicacion}</p>
+        <div class="etiquetas">
+          <span class="etiqueta">${vacante.modalidad}</span>
+          <span class="etiqueta">${vacante.experiencia}</span>
+          ${etiquetasAcc}
+        </div>
+      </div>
+      <button type="button" class="boton" onclick="mostrarDetalleVacante(${vacante.id})">
+        Ver detalles de ${vacante.titulo}
+      </button>
+    </article>
+  `;
+        }
+
+        async function cargarVacantes() {
+            const { data, error } = await db
+                .from("vacantes")
+                .select("*")
+                .order("id", { ascending: false });
+
+            if (error) {
+                console.error("Error cargando vacantes:", error);
+                vacantes = vacantesRespaldo;
+            } else {
+                vacantes = data;
+            }
+
+            if (vacantes.length > 0 && !vacanteSeleccionada) {
+                vacanteSeleccionada = vacantes[0];
+            }
+
+            document.getElementById("vacantes-destacadas").innerHTML = vacantes.slice(0, 3).map(crearTarjetaVacante).join("");
+            filtrarVacantes();
+        }
+
+        function filtrarVacantes() {
+            const texto = document.getElementById("entradaBusqueda").value.toLowerCase().trim();
+            const modalidad = document.getElementById("filtroModalidad").value;
+            const accesibilidad = document.getElementById("filtroAccesibilidad").value;
+
+            const filtradas = vacantes.filter(v => {
+                const listaAcc = Array.isArray(v.accesibilidad) ? v.accesibilidad : [];
+                const coincideTexto = v.titulo.toLowerCase().includes(texto) || v.empresa.toLowerCase().includes(texto);
+                const coincideModalidad = modalidad === "todas" || v.modalidad === modalidad;
+                const coincideAcc = accesibilidad === "todas" || listaAcc.includes(accesibilidad);
+                return coincideTexto && coincideModalidad && coincideAcc;
+            });
+
+            const textoContador = `Mostrando ${filtradas.length} vacante${filtradas.length === 1 ? "" : "s"} disponible${filtradas.length === 1 ? "" : "s"}.`;
+            document.getElementById("contador-resultados").textContent = textoContador;
+
+            const elementoLista = document.getElementById("lista-vacantes");
+            if (filtradas.length === 0) {
+                elementoLista.innerHTML = `<p>No se encontraron vacantes con esos filtros. Intenta ampliar tu búsqueda.</p>`;
+            } else {
+                elementoLista.innerHTML = filtradas.map(crearTarjetaVacante).join("");
+            }
+        }
+
+        function mostrarDetalleVacante(id) {
+            vacanteSeleccionada = vacantes.find(v => v.id === id);
+            if (!vacanteSeleccionada) return;
+            const listaAcc = (Array.isArray(vacanteSeleccionada.accesibilidad) ? vacanteSeleccionada.accesibilidad : [])
+                .map(a => `<li>${a}</li>`).join("");
+
+            document.getElementById("caja-detalle-vacante").innerHTML = `
+    <h2 id="titulo-detalle">${vacanteSeleccionada.titulo}</h2>
+    <p class="nombre-empresa">${vacanteSeleccionada.empresa} · ${vacanteSeleccionada.ubicacion} (${vacanteSeleccionada.modalidad})</p>
+    <p><strong>Requisito de experiencia:</strong> ${vacanteSeleccionada.experiencia}</p>
+    <h3>Descripción del puesto</h3>
+    <p>${vacanteSeleccionada.descripcion}</p>
+    <h3>Condiciones de accesibilidad verificadas</h3>
+    <ul>${listaAcc || "<li>Entorno estándar</li>"}</ul>
+  `;
+            mostrarVista("detalle-vacante");
+        }
+
+        function abrirFormularioPostulacion() {
+            document.getElementById("titulo-vacante-postulacion").textContent = `Vacante: ${vacanteSeleccionada.titulo} — ${vacanteSeleccionada.empresa}`;
+            document.getElementById("retroalimentacion-postulacion").innerHTML = "";
+
+            if (usuarioActivo) {
+                document.getElementById("nombrePostulante").value = usuarioActivo.nombre;
+                document.getElementById("correoPostulante").value = usuarioActivo.correo;
+            }
+
+            mostrarVista("postular");
+        }
+
+        function establecerErrorCampo(idEntrada, idError, mensaje) {
+            const entrada = document.getElementById(idEntrada);
+            const cajaError = document.getElementById(idError);
+            if (mensaje) {
+                entrada.setAttribute("aria-invalid", "true");
+                cajaError.textContent = `⚠ Error: ${mensaje}`;
+                cajaError.hidden = false;
+                return false;
+            } else {
+                entrada.removeAttribute("aria-invalid");
+                cajaError.textContent = "";
+                cajaError.hidden = true;
+                return true;
+            }
+        }
+
+        function actualizarContadorMensajes() {
+            const btnNav = document.getElementById("nav-btn-mensajes");
+            if (btnNav) {
+                btnNav.textContent = `Mis Mensajes (${postulaciones.length})`;
+            }
+        }
+
+        async function cargarPostulacionesDesdeBD() {
+            const { data, error } = await db
+                .from("postulaciones")
+                .select("*, mensajes(*)")
+                .order("id", { ascending: false });
+
+            if (!error && data) {
+                postulaciones = data;
+                actualizarContadorMensajes();
+                renderizarMensajes();
+            }
+        }
+
+        async function enviarPostulacion(evento) {
+            evento.preventDefault();
+            const valorNombre = document.getElementById("nombrePostulante").value.trim();
+            const valorCorreo = document.getElementById("correoPostulante").value.trim();
+            const valorCarrera = document.getElementById("carreraPostulante").value.trim();
+            const valorAjustes = document.getElementById("ajustesPostulante").value.trim();
+
+            const v1 = establecerErrorCampo("nombrePostulante", "error-nombre", valorNombre ? "" : "Ingresa tu nombre completo para continuar.");
+            const v2 = establecerErrorCampo("correoPostulante", "error-correo", (valorCorreo && valorCorreo.includes("@")) ? "" : "Ingresa un correo electrónico válido (ejemplo: usuario@dominio.com).");
+            const v3 = establecerErrorCampo("carreraPostulante", "error-carrera", valorCarrera ? "" : "Indica tu carrera o área de estudios.");
+
+            if (!v1 || !v2 || !v3) {
+                const primerInvalido = document.querySelector("#formularioPostulacion [aria-invalid='true']");
+                if (primerInvalido) primerInvalido.focus();
+                return;
+            }
+
+            const mensajeInicial = valorAjustes
+                ? `Postulación enviada (${valorCarrera}). Mensaje y ajustes solicitados: ${valorAjustes}`
+                : `Hola, envío mi postulación para la vacante de ${vacanteSeleccionada.titulo}. Formación: ${valorCarrera}.`;
+
+            const { data: postInsertada, error: errPost } = await db
+                .from("postulaciones")
+                .insert([{
+                    vacante_id: vacanteSeleccionada.id,
+                    titulo_vacante: vacanteSeleccionada.titulo,
+                    empresa: vacanteSeleccionada.empresa,
+                    postulante: valorNombre,
+                    correo: valorCorreo,
+                    carrera: valorCarrera,
+                    estado: "Enviada · En espera de respuesta",
+                    respondida: false
+                }])
+                .select()
+                .single();
+
+            if (errPost) {
+                document.getElementById("retroalimentacion-postulacion").innerHTML = `
+                <div class="caja-alerta alerta-error">⚠ No se pudo guardar en la base de datos: ${errPost.message}</div>
+            `;
+                return;
+            }
+
+            await db.from("mensajes").insert([{
+                postulacion_id: postInsertada.id,
+                remitente: `${valorNombre} (Tú)`,
+                es_empresa: false,
+                texto: mensajeInicial
+            }]);
+
+            await cargarPostulacionesDesdeBD();
+
+            document.getElementById("retroalimentacion-postulacion").innerHTML = `
+            <div class="caja-alerta alerta-exito">
+              <p style="margin:0 0 12px;">✓ Postulación guardada en la base de datos para "${vacanteSeleccionada.titulo}". La empresa te contactará a ${valorCorreo}.</p>
+              <button type="button" class="boton boton-secundario" onclick="mostrarVista('mensajes')">Ver en Mis Mensajes</button>
+            </div>
+        `;
+            document.getElementById("formularioPostulacion").reset();
+            anunciar("Postulación enviada correctamente y guardada en Supabase.");
+        }
+
+        function renderizarMensajes() {
+            const contenedor = document.getElementById("lista-hilos-mensajes");
+            if (!contenedor) return;
+
+            if (postulaciones.length === 0) {
+                contenedor.innerHTML = `<div class="caja-panel"><p>Aún no hay postulaciones registradas en la base de datos. Explora las vacantes disponibles para iniciar una conversación.</p></div>`;
+                return;
+            }
+
+            contenedor.innerHTML = postulaciones.map(hilo => {
+                const claseEstado = hilo.respondida ? "etiqueta-exito" : "etiqueta-accesible";
+                const iconoEstado = hilo.respondida ? "✓" : "⏳";
+                const listaMensajes = (hilo.mensajes || []).sort((a, b) => a.id - b.id);
+
+                const burbujas = listaMensajes.map(m => {
+                    const hora = m.creado_en ? new Date(m.creado_en).toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" }) : "Reciente";
+                    return `
+                <div class="burbuja-mensaje ${m.es_empresa ? "burbuja-empresa" : ""}">
+                    <p class="meta-mensaje">${m.remitente} · <span style="font-weight:400; color:var(--texto-secundario);">${hora}</span></p>
+                    <p style="margin:0;">${m.texto}</p>
+                </div>
+            `;
+                }).join("");
+
+                return `
+            <article class="caja-panel" style="max-width:100%; margin:0;" aria-labelledby="hilo-titulo-${hilo.id}">
+                <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:flex-start; gap:12px;">
+                    <div>
+                        <h3 id="hilo-titulo-${hilo.id}" style="margin:0 0 4px; color:var(--color-primario);">${hilo.titulo_vacante}</h3>
+                        <p class="nombre-empresa" style="margin:0;">${hilo.empresa} · Candidato: ${hilo.postulante} (${hilo.correo})</p>
+                    </div>
+                    <span class="etiqueta ${claseEstado}">${iconoEstado} ${hilo.estado}</span>
+                </div>
+
+                <div class="hilo-mensajes" aria-label="Historial de mensajes con ${hilo.empresa}">
+                    ${burbujas}
+                </div>
+
+                <form onsubmit="enviarMensajeSeguimiento(event, ${hilo.id})" style="margin-top:12px;">
+                    <div class="grupo-formulario" style="margin-bottom:10px;">
+                        <label for="respuesta-input-${hilo.id}">Escribir mensaje de seguimiento para ${hilo.empresa}</label>
+                        <input type="text" id="respuesta-input-${hilo.id}" placeholder="Escribe una consulta o confirma tu disponibilidad de horario...">
+                    </div>
+                    <div style="display:flex; flex-wrap:wrap; gap:10px;">
+                        <button type="submit" class="boton">Enviar mensaje</button>
+                        <button type="button" class="boton boton-secundario" onclick="simularRespuestaEmpresa(${hilo.id})">
+                            Simular respuesta de la empresa
+                        </button>
+                    </div>
+                </form>
+            </article>
+            `;
+            }).join("");
+        }
+
+        async function enviarMensajeSeguimiento(evento, idHilo) {
+            evento.preventDefault();
+            const input = document.getElementById(`respuesta-input-${idHilo}`);
+            const texto = input.value.trim();
+            if (!texto) {
+                input.focus();
+                return;
+            }
+
+            const hilo = postulaciones.find(p => p.id === idHilo);
+            if (!hilo) return;
+
+            const esRolEmpresa = usuarioActivo && usuarioActivo.rol.includes("Empresa");
+            const nombreRemitente = esRolEmpresa
+                ? `${usuarioActivo.nombre} (Empresa)`
+                : `${usuarioActivo ? usuarioActivo.nombre : hilo.postulante} (Tú)`;
+
+            await db.from("mensajes").insert([{
+                postulacion_id: idHilo,
+                remitente: nombreRemitente,
+                es_empresa: esRolEmpresa,
+                texto: texto
+            }]);
+
+            if (esRolEmpresa) {
+                await db.from("postulaciones").update({
+                    respondida: true,
+                    estado: "Respondida por la empresa"
+                }).eq("id", idHilo);
+            }
+
+            await cargarPostulacionesDesdeBD();
+            document.getElementById("retroalimentacion-mensajes").innerHTML = `
+            <div class="caja-alerta alerta-exito">✓ Mensaje guardado en el hilo de "${hilo.titulo_vacante}".</div>
+        `;
+            anunciar("Mensaje enviado correctamente.");
+        }
+
+        async function simularRespuestaEmpresa(idHilo) {
+            const hilo = postulaciones.find(p => p.id === idHilo);
+            if (!hilo) return;
+
+            await db.from("mensajes").insert([{
+                postulacion_id: idHilo,
+                remitente: `${hilo.empresa} (Reclutamiento)`,
+                es_empresa: true,
+                texto: `¡Hola ${hilo.postulante}! Hemos recibido tu postulación en nuestra base de datos y confirmamos todos los ajustes de accesibilidad y horario flexible para el puesto de ${hilo.titulo_vacante}. Te esperamos en la entrevista inicial.`
+            }]);
+
+            await db.from("postulaciones").update({
+                respondida: true,
+                estado: "Respondida por la empresa"
+            }).eq("id", idHilo);
+
+            await cargarPostulacionesDesdeBD();
+            document.getElementById("retroalimentacion-mensajes").innerHTML = `
+            <div class="caja-alerta alerta-exito">✓ Nueva respuesta guardada de ${hilo.empresa}.</div>
+        `;
+            anunciar(`La empresa ${hilo.empresa} ha respondido a tu postulación.`);
+        }
+
+        async function publicarVacante(evento) {
+            evento.preventDefault();
+            const valorTitulo = document.getElementById("tituloPuesto").value.trim();
+            const valorEmpresa = document.getElementById("nombreEmpresa").value.trim();
+            const valorDescripcion = document.getElementById("descripcionPuesto").value.trim();
+            const valorModalidad = document.getElementById("modalidadPuesto").value;
+
+            const v1 = establecerErrorCampo("tituloPuesto", "error-titulo", valorTitulo ? "" : "Escribe el título de la vacante.");
+            const v2 = establecerErrorCampo("nombreEmpresa", "error-empresa", valorEmpresa ? "" : "Escribe el nombre de la empresa.");
+            const v3 = establecerErrorCampo("descripcionPuesto", "error-descripcion", valorDescripcion ? "" : "Agrega una breve descripción de las actividades.");
+
+            if (!v1 || !v2 || !v3) {
+                const primerInvalido = document.querySelector("#formularioPublicar [aria-invalid='true']");
+                if (primerInvalido) primerInvalido.focus();
+                return;
+            }
+
+            const casillasMarcadas = Array.from(document.querySelectorAll("input[name='caracteristicaAcc']:checked")).map(cb => cb.value);
+
+            const { error } = await db.from("vacantes").insert([{
+                titulo: valorTitulo,
+                empresa: valorEmpresa,
+                modalidad: valorModalidad,
+                ubicacion: "Área Metropolitana de Guadalajara",
+                experiencia: "0 años (Recién egresado / Practicante)",
+                accesibilidad: casillasMarcadas.length ? casillasMarcadas : ["Horario compatible con clases"],
+                descripcion: valorDescripcion
+            }]);
+
+            if (error) {
+                document.getElementById("retroalimentacion-publicar").innerHTML = `
+                <div class="caja-alerta alerta-error">⚠ Error al publicar en Supabase: ${error.message}</div>
+            `;
+                return;
+            }
+
+            await cargarVacantes();
+
+            document.getElementById("retroalimentacion-publicar").innerHTML = `
+            <div class="caja-alerta alerta-exito">
+              ✓ Vacante "${valorTitulo}" guardada en la base de datos. Ya es visible para todos los usuarios.
+            </div>
+        `;
+            document.getElementById("formularioPublicar").reset();
+            anunciar("Nueva vacante publicada en la base de datos.");
+        }
+
+        function cambiarModoAuth(modo) {
+            const formLogin = document.getElementById("formularioLogin");
+            const formRegistro = document.getElementById("formularioRegistro");
+            const tabLogin = document.getElementById("tab-login");
+            const tabRegistro = document.getElementById("tab-registro");
+            document.getElementById("retroalimentacion-auth").innerHTML = "";
+
+            if (modo === "login") {
+                formLogin.classList.remove("oculto");
+                formRegistro.classList.add("oculto");
+                tabLogin.classList.remove("boton-secundario");
+                tabLogin.setAttribute("aria-selected", "true");
+                tabRegistro.classList.add("boton-secundario");
+                tabRegistro.setAttribute("aria-selected", "false");
+            } else {
+                formLogin.classList.add("oculto");
+                formRegistro.classList.remove("oculto");
+                tabRegistro.classList.remove("boton-secundario");
+                tabRegistro.setAttribute("aria-selected", "true");
+                tabLogin.classList.add("boton-secundario");
+                tabLogin.setAttribute("aria-selected", "false");
+            }
+        }
+
+        function alternarVisibilidadPass(idInput, boton) {
+            const input = document.getElementById(idInput);
+            if (input.type === "password") {
+                input.type = "text";
+                boton.textContent = "Ocultar";
+                boton.setAttribute("aria-pressed", "true");
+            } else {
+                input.type = "password";
+                boton.textContent = "Mostrar";
+                boton.setAttribute("aria-pressed", "false");
+            }
+        }
+
+        function iniciarSesionDemo(tipo) {
+            if (tipo === "estudiante") {
+                usuarioActivo = {
+                    nombre: "Mateo Hernández",
+                    correo: "mateo.hernandez@alumnos.udg.mx",
+                    rol: "Estudiante"
+                };
+            } else {
+                usuarioActivo = {
+                    nombre: "Tecnología Inclusiva Jalisco",
+                    correo: "talento@tecinclusiva.mx",
+                    rol: "Empresa"
+                };
+            }
+            localStorage.setItem("primerPasoUsuario", JSON.stringify(usuarioActivo));
+            actualizarInterfazSesion();
+            anunciar(`Sesión iniciada como ${usuarioActivo.nombre}.`);
+            mostrarVista("inicio");
+        }
+
+        function procesarLogin(evento) {
+            evento.preventDefault();
+            const correo = document.getElementById("loginCorreo").value.trim();
+            const pass = document.getElementById("loginContrasena").value.trim();
+
+            const v1 = establecerErrorCampo("loginCorreo", "error-login-correo", (correo && correo.includes("@")) ? "" : "Ingresa un correo electrónico válido.");
+            const v2 = establecerErrorCampo("loginContrasena", "error-login-pass", pass.length >= 6 ? "" : "La contraseña debe tener al menos 6 caracteres.");
+
+            if (!v1 || !v2) {
+                const primerInvalido = document.querySelector("#formularioLogin [aria-invalid='true']");
+                if (primerInvalido) primerInvalido.focus();
+                return;
+            }
+
+            const cuentasGuardadas = JSON.parse(localStorage.getItem("primerPasoCuentas")) || [];
+            const cuentaEncontrada = cuentasGuardadas.find(c => c.correo.toLowerCase() === correo.toLowerCase());
+
+            if (cuentaEncontrada) {
+                usuarioActivo = {
+                    nombre: cuentaEncontrada.nombre,
+                    correo: cuentaEncontrada.correo,
+                    rol: cuentaEncontrada.rol
+                };
+            } else {
+                const nombreExtraido = correo.split("@")[0].replace(".", " ");
+                usuarioActivo = {
+                    nombre: nombreExtraido.charAt(0).toUpperCase() + nombreExtraido.slice(1),
+                    correo: correo,
+                    rol: "Estudiante"
+                };
+            }
+
+            localStorage.setItem("primerPasoUsuario", JSON.stringify(usuarioActivo));
+            actualizarInterfazSesion();
+            document.getElementById("formularioLogin").reset();
+            anunciar(`Bienvenido, ${usuarioActivo.nombre}.`);
+            mostrarVista("inicio");
+        }
+
+        function procesarRegistro(evento) {
+            evento.preventDefault();
+            const nombre = document.getElementById("regNombre").value.trim();
+            const rol = document.getElementById("regRol").value;
+            const correo = document.getElementById("regCorreo").value.trim();
+            const pass = document.getElementById("regContrasena").value.trim();
+
+            const v1 = establecerErrorCampo("regNombre", "error-reg-nombre", nombre ? "" : "Escribe tu nombre completo o el de tu empresa.");
+            const v2 = establecerErrorCampo("regCorreo", "error-reg-correo", (correo && correo.includes("@")) ? "" : "Ingresa un correo electrónico válido.");
+            const v3 = establecerErrorCampo("regContrasena", "error-reg-pass", pass.length >= 6 ? "" : "Crea una contraseña de al menos 6 caracteres.");
+
+            if (!v1 || !v2 || !v3) {
+                const primerInvalido = document.querySelector("#formularioRegistro [aria-invalid='true']");
+                if (primerInvalido) primerInvalido.focus();
+                return;
+            }
+
+            const cuentasGuardadas = JSON.parse(localStorage.getItem("primerPasoCuentas")) || [];
+            cuentasGuardadas.push({ nombre, rol, correo });
+            localStorage.setItem("primerPasoCuentas", JSON.stringify(cuentasGuardadas));
+
+            usuarioActivo = { nombre, correo, rol };
+            localStorage.setItem("primerPasoUsuario", JSON.stringify(usuarioActivo));
+            actualizarInterfazSesion();
+            document.getElementById("formularioRegistro").reset();
+            anunciar(`Cuenta creada. Sesión iniciada como ${nombre}.`);
+            mostrarVista("inicio");
+        }
+
+        function cerrarSesion() {
+            usuarioActivo = null;
+            localStorage.removeItem("primerPasoUsuario");
+            actualizarInterfazSesion();
+            anunciar("Sesión cerrada correctamente.");
+            mostrarVista("inicio");
+        }
+
+        cargarPreferenciasAcc();
+        actualizarInterfazSesion();
+        cargarVacantes();
+        cargarPostulacionesDesdeBD();
+    </script>
 </head>
 <body>
 
